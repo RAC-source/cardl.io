@@ -23,6 +23,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       })
     }
 
+    // Überprüfen ob Supabase verfügbar ist
+    if (!supabase) {
+      console.error('Supabase client not available')
+      return res.status(500).json({ 
+        error: 'Datenbankverbindung nicht verfügbar' 
+      })
+    }
+
     // In die Datenbank einfügen (notify_list Tabelle)
     const { data, error } = await supabase
       .from('notify_list')
@@ -46,7 +54,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       
       console.error('Database error:', error)
       return res.status(500).json({ 
-        error: 'Fehler beim Speichern der E-Mail-Adresse' 
+        error: 'Fehler beim Speichern der E-Mail-Adresse',
+        details: error.message
       })
     }
 
