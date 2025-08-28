@@ -1,0 +1,63 @@
+// Add these files at the REPO ROOT next to your /pages folder
+// ├─ package.json
+// ├─ next.config.ts (or next.config.mjs)
+// ├─ tsconfig.json
+// └─ pages/index.tsx  (you already have this)
+
+// package.json
+{
+  "name": "cardl.io",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "vercel-build": "next build"
+  },
+  "dependencies": {
+    "next": "14.2.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "typescript": "5.5.4",
+    "@types/react": "18.3.3",
+    "@types/node": "20.14.2",
+    "eslint": "9.4.0",
+    "eslint-config-next": "14.2.5"
+  }
+}
+
+// next.config.ts
+import type { NextConfig } from 'next'
+const nextConfig: NextConfig = { reactStrictMode: true }
+export default nextConfig
+
+// tsconfig.json
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "lib": ["dom", "dom.iterable", "es2020"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "baseUrl": "."
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
+}
+
+// (optional) public/ files to avoid 404s for meta
+// Create folder: /public and add minimal icons
+// - /public/favicon.ico (any 32x32 ico)
+// - /public/og.png (1200x630 placeholder)
