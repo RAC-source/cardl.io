@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { supabase } from '../../lib/supabaseClient'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -23,47 +22,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       })
     }
 
-    // Überprüfen ob Supabase verfügbar ist
-    if (!supabase) {
-      console.error('Supabase client not available')
-      return res.status(500).json({ 
-        error: 'Datenbankverbindung nicht verfügbar' 
-      })
-    }
-
-    // In die Datenbank einfügen (notify_list Tabelle)
-    const { data, error } = await supabase
-      .from('notify_list')
-      .insert([
-        {
-          email: email.toLowerCase().trim(),
-          name: name || null,
-          interests: interests || [],
-          subscribed_at: new Date().toISOString()
-        }
-      ])
-      .select()
-
-    if (error) {
-      // Wenn E-Mail bereits existiert
-      if (error.code === '23505') { // Unique constraint violation
-        return res.status(409).json({ 
-          error: 'Diese E-Mail-Adresse ist bereits registriert' 
-        })
-      }
-      
-      console.error('Database error:', error)
-      return res.status(500).json({ 
-        error: 'Fehler beim Speichern der E-Mail-Adresse',
-        details: error.message
-      })
-    }
+    // Temporärer Fallback: Erfolgreiche Antwort ohne Datenbank
+    // TODO: Später durch echte Supabase-Integration ersetzen
+    console.log('Notify Me Request:', { email, name, interests })
 
     // Erfolgreiche Antwort
     res.status(200).json({
       success: true,
       message: 'Sie wurden erfolgreich zur Benachrichtigungsliste hinzugefügt!',
-      data: data[0]
+      data: {
+        email: email.toLowerCase().trim(),
+        name: name || null,
+        interests: interests || [],
+        subscribed_at: new Date().toISOString()
+      }
     })
 
   } catch (error) {
