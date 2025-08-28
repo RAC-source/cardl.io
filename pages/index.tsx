@@ -117,11 +117,11 @@ export default function ComingSoon() {
       <div className="wrap">
         <main className="card" role="main" aria-labelledby="title">
           <div className="top">
-            <a className="brand" href="/" aria-label="cardl home">
+            <a className="brand" href="/" aria-label="cardl.io home">
               <div className="logo" aria-hidden>
                 <div className="chip" />
               </div>
-              <span className="wordmark">cardl</span>
+              <span className="wordmark">cardl.io</span>
             </a>
             <div className="cta">
               <a href="mailto:hello@cardl.io" aria-label="Kontakt per E‑Mail">Contact</a>
@@ -156,8 +156,8 @@ export default function ComingSoon() {
           <div className="footer">
             <div>© {new Date().getFullYear()} cardl.io • All rights reserved</div>
             <div className="social" aria-label="Social Links">
-              <a href="https://twitter.com/cardlio" target="_blank" rel="noreferrer">Twitter/X</a>
-              <a href="https://instagram.com/cardlio" target="_blank" rel="noreferrer">Instagram</a>
+              <a href="https://twitter.com/cardl_io" target="_blank" rel="noreferrer">Twitter/X</a>
+              <a href="https://instagram.com/cardl.io" target="_blank" rel="noreferrer">Instagram</a>
             </div>
           </div>
         </main>
