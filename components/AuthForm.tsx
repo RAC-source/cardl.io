@@ -12,6 +12,11 @@ export default function AuthForm() {
     setMessage('')
 
     try {
+      if (!supabase) {
+        setMessage('Authentifizierung ist derzeit nicht verfügbar. Bitte versuchen Sie es später erneut.')
+        return
+      }
+
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
@@ -34,6 +39,11 @@ export default function AuthForm() {
 
   const handleGoogleSignIn = async () => {
     try {
+      if (!supabase) {
+        setMessage('Authentifizierung ist derzeit nicht verfügbar. Bitte versuchen Sie es später erneut.')
+        return
+      }
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
