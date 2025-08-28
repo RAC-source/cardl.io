@@ -61,7 +61,10 @@ Setzen Sie alle Umgebungsvariablen in Ihren Vercel-Projekteinstellungen.
 ## Verfügbare Endpunkte
 
 - **`/api/health`** - Health-Check für Monitoring
+- **`/api/notify-me`** - E-Mail-Registrierung für Coming-Soon
 - **`/api/stripe/webhook`** - Stripe Webhook für Zahlungsverarbeitung
+- **`/api/stripe/create-checkout`** - Stripe Checkout-Session erstellen
+- **`/api/test-db`** - Datenbankverbindung testen
 
 ## Roadmap / To-Do
 
@@ -77,8 +80,8 @@ Setzen Sie alle Umgebungsvariablen in Ihren Vercel-Projekteinstellungen.
 - [x] Order-Schema & Warenkorb-Skeleton
 
 ### Phase 3: Zahlungen & Checkout
-- [ ] Stripe Checkout (Testmode), Success/Cancel Routes
-- [ ] Webhook: payment_intent.succeeded → Order paid
+- [x] Stripe Checkout (Testmode), Success/Cancel Routes
+- [x] Webhook: payment_intent.succeeded → Order paid
 
 ### Phase 4: Core Features
 - [ ] Editor v1: Text/Bild, PNG-Export (300 dpi inkl. Bleed)

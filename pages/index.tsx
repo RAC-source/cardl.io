@@ -8,6 +8,7 @@
 
 import Head from 'next/head'
 import { useEffect, useState } from 'react'
+import NotifyMe from '../components/NotifyMe'
 
 export default function ComingSoon() {
   // --- Simple countdown to an arbitrary launch date (edit as needed) ---
@@ -139,12 +140,9 @@ export default function ComingSoon() {
               <TimeBox n={s} label="Sekunden" />
             </div>
 
-            <form className="newsletter" method="post" action="#">
-              {/* TODO: Replace action with your real endpoint (e.g. Supabase Edge Function or Form provider) */}
-              <label htmlFor="email" className="sr-only">E‑Mail</label>
-              <input id="email" name="email" type="email" placeholder="Benachrichtige mich: E‑Mail" required />
-              <button type="submit">Notify me</button>
-            </form>
+            <div className="newsletter">
+              <NotifyMe />
+            </div>
 
             <div className="meta">
               <span className="pill">ID‑1 Format • 85,60 × 53,98 mm</span>
