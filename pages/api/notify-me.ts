@@ -44,12 +44,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (isSupabaseAvailable() && supabase) {
       console.log('Attempting Supabase insert...')
       try {
+        // Teste zuerst die Verbindung
+        console.log('Testing connection...')
+        const { data: testData, error: testError } = await supabase
+          .from('notify_list')
+          .select('count')
+          .limit(1)
+        
+        console.log('Connection test result:', { testData, testError })
+
+        if (testError) {
+          console.error('Connection test failed:', testError)
+          throw testError
+        }
+
+        console.log('Connection successful, attempting insert...')
         const { data, error } = await supabase
           .from('notify_list')
           .insert([emailData])
           .select()
 
-        console.log('Supabase response:', { data, error })
+        console.log('Supabase insert response:', { data, error })
 
         if (error) {
           // Wenn E-Mail bereits existiert
