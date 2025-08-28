@@ -30,17 +30,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       subscribed_at: new Date().toISOString()
     }
 
+    // Debug-Logging
+    console.log('=== NOTIFY ME DEBUG ===')
+    console.log('Environment check:', {
+      NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'NOT SET',
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'NOT SET'
+    })
+    console.log('Supabase available:', isSupabaseAvailable())
+    console.log('Supabase client:', supabase ? 'EXISTS' : 'NULL')
+    console.log('Email data:', emailData)
+
     // Versuche Supabase zu verwenden, falls verfügbar
     if (isSupabaseAvailable() && supabase) {
+      console.log('Attempting Supabase insert...')
       try {
         const { data, error } = await supabase
           .from('notify_list')
           .insert([emailData])
           .select()
 
+        console.log('Supabase response:', { data, error })
+
         if (error) {
           // Wenn E-Mail bereits existiert
           if (error.code === '23505') {
+            console.log('Duplicate email detected')
             return res.status(409).json({ 
               error: 'Diese E-Mail-Adresse ist bereits registriert' 
             })
@@ -50,6 +64,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           // Fallback: Erfolgreiche Antwort trotz DB-Fehler
         } else {
           // Erfolgreich in Datenbank gespeichert
+          console.log('Successfully saved to database')
           return res.status(200).json({
             success: true,
             message: 'Sie wurden erfolgreich zur Benachrichtigungsliste hinzugefügt!',
@@ -61,10 +76,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.error('Supabase operation failed:', supabaseError)
         // Fallback: Weiter mit lokaler Verarbeitung
       }
+    } else {
+      console.log('Supabase not available, using fallback')
     }
 
     // Fallback: Lokale Verarbeitung (immer erfolgreich)
-    console.log('Notify Me Request (fallback):', emailData)
+    console.log('Using fallback storage')
     
     // Hier könnten wir später eine lokale Datei oder andere Speichermethode verwenden
     // Für jetzt: Immer erfolgreiche Antwort
