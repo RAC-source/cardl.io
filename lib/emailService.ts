@@ -1,19 +1,38 @@
 import nodemailer from 'nodemailer'
 
-// Fastmail SMTP-Konfiguration
+// E-Mail-Provider-Konfiguration
 const createTransporter = () => {
-  return nodemailer.createTransport({
-    host: 'smtp.fastmail.com',
-    port: 587,
-    secure: false, // true für 465, false für andere Ports
-    auth: {
-      user: process.env.FASTMAIL_USER, // Ihre Fastmail-E-Mail-Adresse
-      pass: process.env.FASTMAIL_PASSWORD // Ihr Fastmail-App-Passwort
-    },
-    tls: {
-      ciphers: 'SSLv3'
-    }
-  })
+  // Priorität: 1. Resend (schnell), 2. Fastmail (langsam)
+  if (process.env.RESEND_API_KEY) {
+    console.log('Using Resend email service (fast)')
+    return nodemailer.createTransport({
+      host: 'smtp.resend.com',
+      port: 587,
+      secure: false,
+      auth: {
+        user: 'resend',
+        pass: process.env.RESEND_API_KEY
+      }
+    })
+  }
+  
+  if (process.env.FASTMAIL_USER && process.env.FASTMAIL_PASSWORD) {
+    console.log('Using Fastmail email service (slow)')
+    return nodemailer.createTransport({
+      host: 'smtp.fastmail.com',
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.FASTMAIL_USER,
+        pass: process.env.FASTMAIL_PASSWORD
+      },
+      tls: {
+        ciphers: 'SSLv3'
+      }
+    })
+  }
+  
+  throw new Error('No email provider configured')
 }
 
 // E-Mail-Template für Willkommensnachricht
@@ -125,5 +144,33 @@ export const testEmailService = async () => {
   } catch (error) {
     console.error('Email service test failed:', error)
     return false
+  }
+}
+
+// Test-E-Mail senden (für Debugging)
+export const sendTestEmail = async (testEmail: string) => {
+  try {
+    const transporter = createTransporter()
+    
+    const testMailOptions = {
+      from: `"cardl.io Test" <${process.env.FASTMAIL_USER}>`,
+      to: testEmail,
+      subject: '🧪 cardl.io E-Mail-Service Test',
+      html: `
+        <h2>E-Mail-Service Test erfolgreich! 🎉</h2>
+        <p>Der Fastmail-Service funktioniert korrekt.</p>
+        <p><strong>Zeitstempel:</strong> ${new Date().toLocaleString('de-DE')}</p>
+        <p><strong>Service:</strong> Fastmail SMTP</p>
+      `,
+      text: `E-Mail-Service Test erfolgreich! Der Fastmail-Service funktioniert korrekt.`
+    }
+    
+    const info = await transporter.sendMail(testMailOptions)
+    console.log('Test email sent successfully:', info.messageId)
+    return { success: true, messageId: info.messageId }
+    
+  } catch (error) {
+    console.error('Test email failed:', error)
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }

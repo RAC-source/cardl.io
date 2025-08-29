@@ -87,6 +87,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             console.log('Sending welcome email...')
             const emailResult = await sendWelcomeEmail(email, name)
             console.log('Email result:', emailResult)
+            
+            // Zusätzliche Logs für Debugging
+            if (emailResult.success) {
+              console.log('✅ Email sent successfully with ID:', emailResult.messageId)
+            } else {
+              console.log('❌ Email failed:', emailResult.error)
+            }
           } catch (emailError) {
             console.error('Failed to send welcome email:', emailError)
             // E-Mail-Fehler soll den Erfolg nicht beeinträchtigen
