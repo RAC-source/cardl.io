@@ -16,15 +16,15 @@ const createTransporter = () => {
     })
   }
   
-  if (process.env.FASTMAIL_USER && process.env.FASTMAIL_PASSWORD) {
+  if (process.env.FASTMAIL_EMAIL && process.env.FASTMAIL_APP_PASSWORD) {
     console.log('Using Fastmail email service (slow)')
     return nodemailer.createTransport({
       host: 'smtp.fastmail.com',
       port: 587,
       secure: false,
       auth: {
-        user: process.env.FASTMAIL_USER,
-        pass: process.env.FASTMAIL_PASSWORD
+        user: process.env.FASTMAIL_EMAIL,
+        pass: process.env.FASTMAIL_APP_PASSWORD
       },
       tls: {
         ciphers: 'SSLv3'
@@ -120,7 +120,7 @@ export const sendWelcomeEmail = async (email: string, name?: string) => {
     const mailOptions = createWelcomeEmail(email, name)
     
     const info = await transporter.sendMail({
-      from: `"cardl.io" <${process.env.FASTMAIL_USER}>`,
+      from: `"cardl.io" <${process.env.FASTMAIL_EMAIL}>`,
       to: email,
       ...mailOptions
     })
@@ -153,7 +153,7 @@ export const sendTestEmail = async (testEmail: string) => {
     const transporter = createTransporter()
     
     const testMailOptions = {
-      from: `"cardl.io Test" <${process.env.FASTMAIL_USER}>`,
+      from: `"cardl.io Test" <${process.env.FASTMAIL_EMAIL}>`,
       to: testEmail,
       subject: '🧪 cardl.io E-Mail-Service Test',
       html: `
