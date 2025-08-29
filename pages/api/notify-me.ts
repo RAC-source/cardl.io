@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { supabase, isSupabaseAvailable } from '../../lib/supabaseClient'
+import { sendWelcomeEmail } from '../../lib/emailService'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -80,11 +81,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         } else {
           // Erfolgreich in Datenbank gespeichert
           console.log('Successfully saved to database')
+          
+          // Sende Willkommens-E-Mail
+          try {
+            console.log('Sending welcome email...')
+            const emailResult = await sendWelcomeEmail(email, name)
+            console.log('Email result:', emailResult)
+          } catch (emailError) {
+            console.error('Failed to send welcome email:', emailError)
+            // E-Mail-Fehler soll den Erfolg nicht beeinträchtigen
+          }
+          
           return res.status(200).json({
             success: true,
             message: 'Sie wurden erfolgreich zur Benachrichtigungsliste hinzugefügt!',
             data: data[0],
-            storage: 'database'
+            storage: 'database',
+            emailSent: true
           })
         }
       } catch (supabaseError) {
