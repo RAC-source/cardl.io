@@ -96,17 +96,23 @@ export default function ImpressumPage() {
               <h2>Angaben gemäß § 5 TMG</h2>
               <p>
                 <strong>Betreiber der Website:</strong><br />
-                cardl.io<br />
-                [Ihr Name]<br />
-                [Ihre Straße und Hausnummer]<br />
-                [PLZ und Ort]
+                r-projects UG (haftungsbeschränkt)<br />
+                Am Bahnhof 6<br />
+                21357 Bardowick<br />
+                HRB -folgt-
+              </p>
+              <p>
+                <strong>Vertreten durch:</strong><br />
+                Robert Bucker
               </p>
             </div>
 
             <div className="section">
               <h2>Kontakt</h2>
               <div className="contact-info">
-                <p><strong>E-Mail:</strong> hello@cardl.io</p>
+                <p><strong>Telefon:</strong> +49 (0) 123 456789</p>
+                <p><strong>Telefax:</strong> +49 (0) 123 456788</p>
+                <p><strong>E-Mail:</strong> info@r-projects.eu</p>
                 <p><strong>Website:</strong> https://cardl.io</p>
                 <p><strong>Geschäftszeiten:</strong> Mo-Fr 9:00-18:00 Uhr</p>
               </div>
@@ -115,10 +121,10 @@ export default function ImpressumPage() {
             <div className="section">
               <h2>Unternehmen</h2>
               <p>
-                <strong>Geschäftsführer:</strong> [Ihr Name]<br />
-                <strong>Umsatzsteuer-ID:</strong> [Ihre USt-ID]<br />
-                <strong>Handelsregister:</strong> [Register und Nummer]<br />
-                <strong>Registergericht:</strong> [Gericht]
+                <strong>Geschäftsführer:</strong> Robert Bucker<br />
+                <strong>Umsatzsteuer-ID:</strong> DE<br />
+                <strong>Handelsregister:</strong> HRB -folgt-<br />
+                <strong>Registergericht:</strong> Lüneburg
               </p>
             </div>
 
@@ -126,8 +132,9 @@ export default function ImpressumPage() {
               <h2>Inhaltlich Verantwortlicher</h2>
               <p>
                 <strong>Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV:</strong><br />
-                [Ihr Name]<br />
-                [Ihre Adresse]
+                Robert Bucker<br />
+                Am Bahnhof 6<br />
+                21357 Bardowick
               </p>
             </div>
 
