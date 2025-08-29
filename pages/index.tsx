@@ -119,11 +119,9 @@ export default function ComingSoon() {
         <main className="card" role="main" aria-labelledby="title">
           <div className="top">
             <a className="brand" href="/" aria-label="cardl.io home">
-              <div className="logo" aria-hidden>
-                <div className="chip" />
-              </div>
-              <span className="wordmark">cardl.io</span>
-            </a>
+  <img src="/cardl-logo-icon-256.png" alt="cardl.io Logo" width={36} height={36} style={{borderRadius:12}} />
+  <span className="wordmark">cardl.io</span>
+</a>
             <div className="cta">
               <a href="mailto:hello@cardl.io" aria-label="Kontakt per E‑Mail">Contact</a>
             </div>
