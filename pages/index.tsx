@@ -9,16 +9,25 @@
 import Head from 'next/head'
 import { useEffect, useState } from 'react'
 import NotifyMe from '../components/NotifyMe'
+import LoginForm from '../components/LoginForm'
 
 export default function ComingSoon() {
   // --- Simple countdown to an arbitrary launch date (edit as needed) ---
   const target = new Date('2025-10-15T08:00:00+02:00').getTime() // TODO: set your real launch date
   const [remaining, setRemaining] = useState<number>(target - Date.now())
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(() => {
     const id = setInterval(() => setRemaining(target - Date.now()), 1000)
     return () => clearInterval(id)
   }, [target])
+
+  useEffect(() => {
+    // Prüfe Login-Status beim Laden
+    if (typeof window !== 'undefined') {
+      setIsLoggedIn(localStorage.getItem('cardl-login') === 'true')
+    }
+  }, [])
 
   const { d, h, m, s } = (() => {
     const total = Math.max(0, remaining)
@@ -28,6 +37,10 @@ export default function ComingSoon() {
     const s = Math.floor((total / 1000) % 60)
     return { d, h, m, s }
   })()
+
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true)
+  }
 
   return (
     <>
@@ -130,7 +143,7 @@ export default function ComingSoon() {
           </div>
 
           <section className="hero">
-            <h1 id="title">We’re printing something great.</h1>
+            <h1 id="title">We're printing something great.</h1>
             <p>Der Ausweiskarten‑Druckdienst. Design. Tap. Done. Bald hier auf <strong>cardl.io</strong>.</p>
 
             <div className="timer" aria-label="Countdown bis zum Start">
@@ -143,6 +156,62 @@ export default function ComingSoon() {
             <div className="newsletter">
               <NotifyMe />
             </div>
+
+            {/* Login-Bereich */}
+            <LoginForm onLoginSuccess={handleLoginSuccess} />
+
+            {/* Geschützter Inhalt - nur sichtbar wenn eingeloggt */}
+            {isLoggedIn && (
+              <div style={{
+                background: 'rgba(22,163,74,.1)',
+                border: '1px solid rgba(22,163,74,.2)',
+                borderRadius: '16px',
+                padding: '24px',
+                margin: '20px 0'
+              }}>
+                <h3 style={{ margin: '0 0 16px 0', color: '#16a34a', fontSize: '20px' }}>
+                  🎉 Willkommen im geschützten Bereich!
+                </h3>
+                <p style={{ margin: '0 0 16px 0', color: '#9ca3af' }}>
+                  Hier können Sie exklusive Inhalte und Funktionen nutzen, die nur für eingeloggte Benutzer verfügbar sind.
+                </p>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                  <a href="/auth/login" style={{
+                    background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+                    color: 'white',
+                    textDecoration: 'none',
+                    padding: '10px 16px',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontWeight: '600'
+                  }}>
+                    🔑 Vollständigen Login
+                  </a>
+                  <a href="/api/test-db" style={{
+                    background: 'rgba(255,255,255,.1)',
+                    color: '#e5e7eb',
+                    textDecoration: 'none',
+                    padding: '10px 16px',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    border: '1px solid rgba(255,255,255,.2)'
+                  }}>
+                    🗄️ DB Test
+                  </a>
+                  <a href="/api/test-email" style={{
+                    background: 'rgba(255,255,255,.1)',
+                    color: '#e5e7eb',
+                    textDecoration: 'none',
+                    padding: '10px 16px',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    border: '1px solid rgba(255,255,255,.2)'
+                  }}>
+                    📧 Email Test
+                  </a>
+                </div>
+              </div>
+            )}
 
             <div className="meta">
               <span className="pill">ID‑1 Format • 85,60 × 53,98 mm</span>
