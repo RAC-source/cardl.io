@@ -235,7 +235,7 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
 
       <div style={{ marginTop: '16px', padding: '12px', background: 'rgba(255,255,255,.05)', borderRadius: '8px' }}>
         <p style={{ margin: 0, fontSize: '12px', color: '#9ca3af', textAlign: 'center' }}>
-          <strong>Demo-Zugang:</strong> Passwort: demo123 | Auth Code: CARDL2025
+          <strong>Beta-Zugang:</strong> Nur für eingeladene Tester verfügbar
         </p>
       </div>
     </div>
