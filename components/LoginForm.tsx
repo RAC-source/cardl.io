@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { useRouter } from 'next/router'
 
 interface LoginFormProps {
-  onLoginSuccess: () => void
+  onLoginSuccess?: () => void
 }
 
 export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
+  const router = useRouter()
   const [password, setPassword] = useState('')
   const [authCode, setAuthCode] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -24,9 +26,9 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
     await new Promise(resolve => setTimeout(resolve, 800))
 
     if (password === VALID_PASSWORD && authCode === VALID_AUTH_CODE) {
-      // Erfolgreicher Login
+      // Erfolgreicher Login - leite zur Login-Seite weiter
       localStorage.setItem('cardl-login', 'true')
-      onLoginSuccess()
+      router.push('/auth/login')
     } else {
       setError('Ungültige Anmeldedaten oder Auth Code')
     }
@@ -71,9 +73,24 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
             Ausloggen
           </button>
         </div>
-        <p style={{ margin: 0, fontSize: '14px', color: '#9ca3af' }}>
+        <p style={{ margin: '0 0 12px 0', fontSize: '14px', color: '#9ca3af' }}>
           Sie haben Zugriff auf den geschützten Bereich.
         </p>
+        <a 
+          href="/dashboard" 
+          style={{
+            background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+            color: 'white',
+            textDecoration: 'none',
+            padding: '8px 16px',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: '600',
+            display: 'inline-block'
+          }}
+        >
+          🚀 Zum Dashboard →
+        </a>
       </div>
     )
   }
@@ -113,7 +130,7 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
           🔐 Geschützter Bereich
         </h3>
         <p style={{ margin: 0, fontSize: '14px', color: '#9ca3af' }}>
-          Geben Sie Ihr Passwort und den Auth Code ein, um Zugang zu erhalten.
+          Geben Sie Ihr Passwort und den Auth Code ein, um Zugang zum Dashboard zu erhalten.
         </p>
       </div>
 
@@ -195,7 +212,7 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
               opacity: isLoading ? 0.7 : 1
             }}
           >
-            {isLoading ? '🔐 Prüfe...' : '🔐 Anmelden'}
+            {isLoading ? '🔐 Prüfe...' : '🔐 Zum Dashboard'}
           </button>
 
           <button
