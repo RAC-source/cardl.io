@@ -6,8 +6,18 @@ import { useRouter } from 'next/router'
 export default function LoginPage() {
   const router = useRouter()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [hasBetaAccess, setHasBetaAccess] = useState(false)
 
   useEffect(() => {
+    // Prüfe Beta-Zugang
+    const betaAccess = localStorage.getItem('cardl-beta-access')
+    if (betaAccess !== 'true') {
+      // Kein Beta-Zugang - zurück zur Startseite
+      router.push('/')
+      return
+    }
+    setHasBetaAccess(true)
+
     // Prüfe Login-Status
     const loginStatus = localStorage.getItem('cardl-login')
     if (loginStatus === 'true') {
@@ -18,6 +28,42 @@ export default function LoginPage() {
       }, 2000)
     }
   }, [router])
+
+  if (!hasBetaAccess) {
+    return (
+      <>
+        <Head>
+          <title>Zugriff verweigert - cardl.io</title>
+          <meta name="description" content="cardl.io - Beta-Zugang erforderlich" />
+        </Head>
+        <div className="wrap">
+          <div className="card" style={{ textAlign: 'center', padding: '60px 32px' }}>
+            <div style={{ fontSize: '24px', color: '#ef4444', marginBottom: '16px' }}>
+              🚫 Zugriff verweigert
+            </div>
+            <div style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '24px' }}>
+              Sie benötigen Beta-Zugang, um diese Seite zu besuchen.
+            </div>
+            <a 
+              href="/" 
+              style={{
+                background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+                color: 'white',
+                textDecoration: 'none',
+                padding: '12px 24px',
+                borderRadius: '12px',
+                fontSize: '16px',
+                fontWeight: '600',
+                display: 'inline-block'
+              }}
+            >
+              Zurück zur Startseite
+            </a>
+          </div>
+        </div>
+      </>
+    )
+  }
 
   return (
     <>
