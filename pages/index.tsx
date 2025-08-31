@@ -170,43 +170,166 @@ export default function ComingSoon() {
                 <h3 style={{ margin: '0 0 16px 0', color: '#16a34a', fontSize: '20px' }}>
                   🎉 Willkommen im geschützten Bereich!
                 </h3>
-                <p style={{ margin: '0 0 16px 0', color: '#9ca3af' }}>
-                  Hier können Sie exklusive Inhalte und Funktionen nutzen, die nur für eingeloggte Benutzer verfügbar sind.
+                <p style={{ margin: '0 0 20px 0', color: '#9ca3af' }}>
+                  Exklusive Einblicke in die Entwicklung von cardl.io - nur für Beta-Tester verfügbar.
                 </p>
-                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                  <a href="/auth/login" style={{
-                    background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
-                    color: 'white',
-                    textDecoration: 'none',
-                    padding: '10px 16px',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    fontWeight: '600'
+
+                {/* Status-Updates */}
+                <div style={{ marginBottom: '24px' }}>
+                  <h4 style={{ margin: '0 0 12px 0', color: '#16a34a', fontSize: '16px' }}>
+                    📊 Entwicklungsstatus
+                  </h4>
+                  <div style={{ display: 'grid', gap: '8px', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+                    <div style={{ background: 'rgba(22,163,74,.1)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(22,163,74,.2)' }}>
+                      <div style={{ fontSize: '14px', fontWeight: '600', color: '#16a34a' }}>✅ Backend</div>
+                      <div style={{ fontSize: '12px', color: '#9ca3af' }}>Supabase & Stripe integriert</div>
+                    </div>
+                    <div style={{ background: 'rgba(37,99,235,.1)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(37,99,235,.2)' }}>
+                      <div style={{ fontSize: '14px', fontWeight: '600', color: '#2563eb' }}>🔄 Frontend</div>
+                      <div style={{ fontSize: '12px', color: '#9ca3af' }}>Design-System in Entwicklung</div>
+                    </div>
+                    <div style={{ background: 'rgba(245,158,11,.1)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(245,158,11,.2)' }}>
+                      <div style={{ fontSize: '14px', fontWeight: '600', color: '#f59e0b' }}>⚙️ Editor</div>
+                      <div style={{ fontSize: '12px', color: '#9ca3af' }}>Canvas-Integration geplant</div>
+                    </div>
+                    <div style={{ background: 'rgba(239,68,68,.1)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(239,68,68,.2)' }}>
+                      <div style={{ fontSize: '14px', fontWeight: '600', color: '#ef4444' }}>🚀 Launch</div>
+                      <div style={{ fontSize: '12px', color: '#9ca3af' }}>Q4 2025 geplant</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Produktvorschau */}
+                <div style={{ marginBottom: '24px' }}>
+                  <h4 style={{ margin: '0 0 12px 0', color: '#16a34a', fontSize: '16px' }}>
+                    🎨 Produktvorschau
+                  </h4>
+                  <div style={{ 
+                    background: 'rgba(255,255,255,.05)', 
+                    border: '1px solid rgba(255,255,255,.1)', 
+                    borderRadius: '12px', 
+                    padding: '16px',
+                    display: 'flex',
+                    gap: '16px',
+                    alignItems: 'center',
+                    flexWrap: 'wrap'
                   }}>
-                    🔑 Vollständigen Login
-                  </a>
-                  <a href="/api/test-db" style={{
-                    background: 'rgba(255,255,255,.1)',
-                    color: '#e5e7eb',
-                    textDecoration: 'none',
-                    padding: '10px 16px',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    border: '1px solid rgba(255,255,255,.2)'
-                  }}>
-                    🗄️ DB Test
-                  </a>
-                  <a href="/api/test-email" style={{
-                    background: 'rgba(255,255,255,.1)',
-                    color: '#e5e7eb',
-                    textDecoration: 'none',
-                    padding: '10px 16px',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    border: '1px solid rgba(255,255,255,.2)'
-                  }}>
-                    📧 Email Test
-                  </a>
+                    <div style={{ 
+                      width: '85.6px', 
+                      height: '53.98px', 
+                      background: 'linear-gradient(135deg, #2563eb, #16a34a)',
+                      borderRadius: '8px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '8px',
+                      color: 'white',
+                      fontWeight: '600',
+                      boxShadow: '0 4px 12px rgba(0,0,0,.3)'
+                    }}>
+                      ID-1
+                    </div>
+                    <div style={{ flex: 1, minWidth: '200px' }}>
+                      <div style={{ fontSize: '14px', fontWeight: '600', color: '#e5e7eb', marginBottom: '4px' }}>
+                        Personalisierte Ausweiskarten
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#9ca3af' }}>
+                        ID-1 Format (85,60 × 53,98 mm) • Ein- & zweiseitiger Druck • 
+                        Hochwertige Materialien • Schnelle Lieferung
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Feature-Demo */}
+                <div style={{ marginBottom: '24px' }}>
+                  <h4 style={{ margin: '0 0 12px 0', color: '#16a34a', fontSize: '16px' }}>
+                    🚀 Kommende Features
+                  </h4>
+                  <div style={{ display: 'grid', gap: '8px', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
+                    <div style={{ background: 'rgba(255,255,255,.05)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,.1)' }}>
+                      <div style={{ fontSize: '14px', fontWeight: '600', color: '#e5e7eb' }}>🎨 Drag & Drop Editor</div>
+                      <div style={{ fontSize: '12px', color: '#9ca3af' }}>Intuitive Gestaltung</div>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,.05)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,.1)' }}>
+                      <div style={{ fontSize: '14px', fontWeight: '600', color: '#e5e7eb' }}>📱 Mobile App</div>
+                      <div style={{ fontSize: '12px', color: '#9ca3af' }}>iOS & Android</div>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,.05)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,.1)' }}>
+                      <div style={{ fontSize: '14px', fontWeight: '600', color: '#e5e7eb' }}>🔐 Enterprise</div>
+                      <div style={{ fontSize: '12px', color: '#9ca3af' }}>Bulk-Orders & API</div>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,.05)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,.1)' }}>
+                      <div style={{ fontSize: '14px', fontWeight: '600', color: '#e5e7eb' }}>🌍 International</div>
+                      <div style={{ fontSize: '12px', color: '#9ca3af' }}>EU-weiter Versand</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Exklusive Links */}
+                <div style={{ marginBottom: '16px' }}>
+                  <h4 style={{ margin: '0 0 12px 0', color: '#16a34a', fontSize: '16px' }}>
+                    🔗 Exklusive Links
+                  </h4>
+                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                    <a href="/auth/login" style={{
+                      background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+                      color: 'white',
+                      textDecoration: 'none',
+                      padding: '10px 16px',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: '600'
+                    }}>
+                      🔑 Vollständigen Login
+                    </a>
+                    <a href="/api/test-db" style={{
+                      background: 'rgba(255,255,255,.1)',
+                      color: '#e5e7eb',
+                      textDecoration: 'none',
+                      padding: '10px 16px',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      border: '1px solid rgba(255,255,255,.2)'
+                    }}>
+                      🗄️ DB Test
+                    </a>
+                    <a href="/api/test-email" style={{
+                      background: 'rgba(255,255,255,.1)',
+                      color: '#e5e7eb',
+                      textDecoration: 'none',
+                      padding: '10px 16px',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      border: '1px solid rgba(255,255,255,.2)'
+                    }}>
+                      📧 Email Test
+                    </a>
+                    <a href="/stripe/create-checkout" style={{
+                      background: 'rgba(255,255,255,.1)',
+                      color: '#e5e7eb',
+                      textDecoration: 'none',
+                      padding: '10px 16px',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      border: '1px solid rgba(255,255,255,.2)'
+                    }}>
+                      💳 Stripe Test
+                    </a>
+                  </div>
+                </div>
+
+                {/* Beta-Tester Info */}
+                <div style={{ 
+                  background: 'rgba(245,158,11,.1)', 
+                  border: '1px solid rgba(245,158,11,.2)', 
+                  borderRadius: '8px', 
+                  padding: '12px',
+                  marginTop: '16px'
+                }}>
+                  <div style={{ fontSize: '12px', color: '#f59e0b', textAlign: 'center' }}>
+                    <strong>🎯 Beta-Tester Vorteil:</strong> Sie erhalten 20% Rabatt auf Ihre erste Bestellung!
+                  </div>
                 </div>
               </div>
             )}
