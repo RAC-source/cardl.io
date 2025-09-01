@@ -460,6 +460,42 @@ export default function DashboardPage() {
                   <a href="/api/stripe/create-checkout" className="btn btn-secondary">
                     💳 Stripe Test
                   </a>
+                  <button 
+                    onClick={async () => {
+                      try {
+                        if (!supabase) {
+                          alert('❌ Supabase nicht verfügbar')
+                          return
+                        }
+                        const { data: { session } } = await supabase.auth.getSession()
+                        if (session?.user) {
+                          const response = await fetch('/api/create-profile', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              user_id: session.user.id,
+                              email: session.user.email,
+                              full_name: session.user.user_metadata?.full_name || session.user.user_metadata?.name,
+                              provider: session.user.app_metadata?.provider
+                            })
+                          })
+                          const result = await response.json()
+                          if (result.success) {
+                            alert('✅ Profil erstellt! Seite wird neu geladen...')
+                            window.location.reload()
+                          } else {
+                            alert('❌ Fehler: ' + result.error)
+                          }
+                        }
+                      } catch (error) {
+                        alert('❌ Fehler beim Erstellen des Profils')
+                      }
+                    }}
+                    className="btn btn-secondary"
+                    style={{ cursor: 'pointer' }}
+                  >
+                    👤 Profil erstellen
+                  </button>
                 </div>
               </div>
             </div>

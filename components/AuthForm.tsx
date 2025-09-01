@@ -104,40 +104,41 @@ export default function AuthForm() {
     setMessage('')
 
     try {
-      if (!supabase) {
-        setMessage('Authentifizierung ist derzeit nicht verfügbar. Bitte versuchen Sie es später erneut.')
-        return
-      }
+      console.log('🆕 Starting registration for:', email)
 
-      // Prüfe ob E-Mail bereits existiert
-      const { data: existingUser } = await supabase.auth.admin.listUsers()
-      const userExists = existingUser?.users?.some(user => user.email === email)
-
-      if (userExists) {
-        setMessage('❌ Diese E-Mail-Adresse ist bereits registriert. Bitte melden Sie sich an.')
-        setLoading(false)
-        return
-      }
-
-      // Erstelle neuen Benutzer
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password: 'temporary-password-' + Math.random().toString(36).substr(2, 9), // Temporäres Passwort
-        options: {
-          emailRedirectTo: process.env.NODE_ENV === 'production' 
-            ? 'https://cardl.io/auth/callback'
-            : `${window.location.origin}/auth/callback`
-        }
+      // Verwende die neue API-Route für Registrierung
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          full_name: email.split('@')[0] // Verwende E-Mail-Prefix als Name
+        })
       })
 
-      if (error) {
-        setMessage(`❌ Registrierung fehlgeschlagen: ${error.message}`)
-      } else {
-        setMessage('✅ Registrierung erfolgreich! Prüfen Sie Ihre E-Mail für die Bestätigung.')
+      const result = await response.json()
+
+      if (response.ok && result.success) {
+        console.log('✅ Registration successful:', result)
+        setMessage('✅ Registrierung erfolgreich! Sie werden automatisch angemeldet...')
         setEmail('')
         setIsRegistration(false)
+        
+        // Automatische Anmeldung nach erfolgreicher Registrierung
+        setTimeout(() => {
+          // Setze Login-Status
+          localStorage.setItem('cardl-login', 'true')
+          // Weiterleitung zum Dashboard
+          window.location.href = '/dashboard'
+        }, 2000)
+      } else {
+        console.error('❌ Registration failed:', result)
+        setMessage(`❌ Registrierung fehlgeschlagen: ${result.error}`)
       }
     } catch (error) {
+      console.error('❌ Registration error:', error)
       setMessage('❌ Ein unerwarteter Fehler ist aufgetreten.')
     } finally {
       setLoading(false)
