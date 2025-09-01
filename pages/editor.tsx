@@ -87,58 +87,112 @@ export default function EditorPage() {
       if (!ctx) return
       
       ctx.textBaseline = 'top'
-      ctx.font = `bold ${16 * scale}px ${cardData.fontFamily}`
-      ctx.fillStyle = cardData.textColor
-
+      
+      // Berechne verfügbaren Platz
+      const padding = 20 * scale
+      const maxWidth = canvas!.width - (padding * 2)
+      const qrSize = 60 * scale
+      const qrX = canvas!.width - qrSize - padding
+      const qrY = canvas!.height - qrSize - padding
+      const textAreaWidth = qrX - (padding * 2)
+      
+      // Hilfsfunktion für Text-Wrapping
+      function wrapText(text: string, maxWidth: number, fontSize: number, fontFamily: string) {
+        ctx!.font = `${fontSize}px ${fontFamily}`
+        const words = text.split(' ')
+        const lines: string[] = []
+        let currentLine = words[0]
+        
+        for (let i = 1; i < words.length; i++) {
+          const word = words[i]
+          const width = ctx!.measureText(currentLine + ' ' + word).width
+          if (width < maxWidth) {
+            currentLine += ' ' + word
+          } else {
+            lines.push(currentLine)
+            currentLine = word
+          }
+        }
+        lines.push(currentLine)
+        return lines
+      }
+      
       // Name
       if (cardData.name) {
-        ctx.font = `bold ${20 * scale}px ${cardData.fontFamily}`
-        ctx.fillText(cardData.name, 20 * scale, 20 * scale)
+        const nameFontSize = 20 * scale
+        const nameLines = wrapText(cardData.name, textAreaWidth, nameFontSize, cardData.fontFamily)
+        ctx.font = `bold ${nameFontSize}px ${cardData.fontFamily}`
+        ctx.fillStyle = cardData.textColor
+        
+        nameLines.forEach((line, index) => {
+          ctx.fillText(line, padding, padding + (index * (nameFontSize + 4)))
+        })
       }
-
+      
       // Titel
       if (cardData.title) {
-        ctx.font = `${14 * scale}px ${cardData.fontFamily}`
+        const titleFontSize = 14 * scale
+        const titleLines = wrapText(cardData.title, textAreaWidth, titleFontSize, cardData.fontFamily)
+        ctx.font = `${titleFontSize}px ${cardData.fontFamily}`
         ctx.fillStyle = cardData.textColor + 'CC'
-        ctx.fillText(cardData.title, 20 * scale, 45 * scale)
+        
+        const nameHeight = cardData.name ? (wrapText(cardData.name, textAreaWidth, 20 * scale, cardData.fontFamily).length * (20 * scale + 4)) : 0
+        const titleY = padding + nameHeight + (10 * scale)
+        
+        titleLines.forEach((line, index) => {
+          ctx.fillText(line, padding, titleY + (index * (titleFontSize + 2)))
+        })
       }
-
+      
       // Firma
       if (cardData.company) {
-        ctx.font = `bold ${16 * scale}px ${cardData.fontFamily}`
+        const companyFontSize = 16 * scale
+        const companyLines = wrapText(cardData.company, textAreaWidth, companyFontSize, cardData.fontFamily)
+        ctx.font = `bold ${companyFontSize}px ${cardData.fontFamily}`
         ctx.fillStyle = cardData.textColor
-        ctx.fillText(cardData.company, 20 * scale, 70 * scale)
+        
+        const nameHeight = cardData.name ? (wrapText(cardData.name, textAreaWidth, 20 * scale, cardData.fontFamily).length * (20 * scale + 4)) : 0
+        const titleHeight = cardData.title ? (wrapText(cardData.title, textAreaWidth, 14 * scale, cardData.fontFamily).length * (14 * scale + 2)) : 0
+        const companyY = padding + nameHeight + titleHeight + (20 * scale)
+        
+        companyLines.forEach((line, index) => {
+          ctx.fillText(line, padding, companyY + (index * (companyFontSize + 2)))
+        })
       }
-
-      // Kontaktdaten
-      ctx.font = `${12 * scale}px ${cardData.fontFamily}`
-      ctx.fillStyle = cardData.textColor + 'CC'
-      let yOffset = 100 * scale
-
-      if (cardData.email) {
-        ctx.fillText(`📧 ${cardData.email}`, 20 * scale, yOffset)
-        yOffset += 25 * scale
-      }
-
-      if (cardData.phone) {
-        ctx.fillText(`📞 ${cardData.phone}`, 20 * scale, yOffset)
-        yOffset += 25 * scale
-      }
-
-      if (cardData.website) {
-        ctx.fillText(`🌐 ${cardData.website}`, 20 * scale, yOffset)
-        yOffset += 25 * scale
-      }
-
-      if (cardData.address) {
-        ctx.fillText(`📍 ${cardData.address}`, 20 * scale, yOffset)
-      }
-
-      // QR-Code Platzhalter
-      const qrSize = 60 * scale
-      const qrX = canvas!.width - qrSize - 20 * scale
-      const qrY = canvas!.height - qrSize - 20 * scale
       
+      // Kontaktdaten
+      const contactFontSize = 12 * scale
+      ctx.font = `${contactFontSize}px ${cardData.fontFamily}`
+      ctx.fillStyle = cardData.textColor + 'CC'
+      
+      // Berechne Y-Position für Kontaktdaten
+      let contactY = padding
+      if (cardData.name) {
+        contactY += wrapText(cardData.name, textAreaWidth, 20 * scale, cardData.fontFamily).length * (20 * scale + 4)
+      }
+      if (cardData.title) {
+        contactY += wrapText(cardData.title, textAreaWidth, 14 * scale, cardData.fontFamily).length * (14 * scale + 2) + 10 * scale
+      }
+      if (cardData.company) {
+        contactY += wrapText(cardData.company, textAreaWidth, 16 * scale, cardData.fontFamily).length * (16 * scale + 2) + 10 * scale
+      }
+      contactY += 20 * scale
+      
+      // Kontaktdaten mit Icons
+      const contactItems = []
+      if (cardData.email) contactItems.push(`📧 ${cardData.email}`)
+      if (cardData.phone) contactItems.push(`📞 ${cardData.phone}`)
+      if (cardData.website) contactItems.push(`🌐 ${cardData.website}`)
+      if (cardData.address) contactItems.push(`📍 ${cardData.address}`)
+      
+      contactItems.forEach((item, index) => {
+        const lines = wrapText(item, textAreaWidth, contactFontSize, cardData.fontFamily)
+        lines.forEach((line, lineIndex) => {
+          ctx.fillText(line, padding, contactY + (index * (contactFontSize + 8)) + (lineIndex * (contactFontSize + 2)))
+        })
+      })
+      
+      // QR-Code Platzhalter (rechts)
       ctx.fillStyle = cardData.textColor + '20'
       ctx.fillRect(qrX, qrY, qrSize, qrSize)
       ctx.strokeStyle = cardData.textColor + '40'
