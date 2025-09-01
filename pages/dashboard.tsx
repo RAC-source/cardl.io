@@ -240,7 +240,135 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Hauptfunktionen */}
+            {/* Benutzerprofil */}
+            <div className="section">
+              <h2>👤 Mein Profil</h2>
+              <div style={{ 
+                background: 'rgba(255,255,255,.05)', 
+                border: '1px solid rgba(255,255,255,.1)', 
+                borderRadius: '16px', 
+                padding: '20px' 
+              }}>
+                {userData ? (
+                  <div style={{ display: 'grid', gap: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      {userData.avatar_url ? (
+                        <img 
+                          src={userData.avatar_url} 
+                          alt="Avatar" 
+                          style={{ 
+                            width: '48px', 
+                            height: '48px', 
+                            borderRadius: '50%',
+                            border: '2px solid rgba(255,255,255,.2)'
+                          }} 
+                        />
+                      ) : (
+                        <div style={{ 
+                          width: '48px', 
+                          height: '48px', 
+                          borderRadius: '50%',
+                          background: 'linear-gradient(135deg, #2563eb, #16a34a)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '20px',
+                          color: 'white'
+                        }}>
+                          {userData.full_name?.charAt(0) || userData.email?.charAt(0) || '?'}
+                        </div>
+                      )}
+                      <div>
+                        <h3 style={{ margin: '0 0 4px 0', color: '#e5e7eb' }}>
+                          {userData.full_name || 'Unbekannter Benutzer'}
+                        </h3>
+                        <p style={{ margin: 0, color: '#9ca3af', fontSize: '14px' }}>
+                          {userData.email}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                      <div style={{ 
+                        background: 'rgba(255,255,255,.05)', 
+                        padding: '12px', 
+                        borderRadius: '8px' 
+                      }}>
+                        <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '4px' }}>
+                          Provider
+                        </div>
+                        <div style={{ color: '#e5e7eb', fontWeight: '500' }}>
+                          {userData.provider ? (
+                            <span style={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: '6px' 
+                            }}>
+                              {userData.provider === 'google' && '🔍'}
+                              {userData.provider === 'apple' && '🍎'}
+                              {userData.provider === 'email' && '📧'}
+                              {userData.provider}
+                            </span>
+                          ) : 'Unbekannt'}
+                        </div>
+                      </div>
+                      
+                      <div style={{ 
+                        background: 'rgba(255,255,255,.05)', 
+                        padding: '12px', 
+                        borderRadius: '8px' 
+                      }}>
+                        <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '4px' }}>
+                          Beta-Zugang
+                        </div>
+                        <div style={{ color: '#e5e7eb', fontWeight: '500' }}>
+                          {userData.beta_access ? (
+                            <span style={{ color: '#16a34a' }}>✅ Aktiv</span>
+                          ) : (
+                            <span style={{ color: '#ef4444' }}>❌ Inaktiv</span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div style={{ 
+                        background: 'rgba(255,255,255,.05)', 
+                        padding: '12px', 
+                        borderRadius: '8px' 
+                      }}>
+                        <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '4px' }}>
+                          Registriert seit
+                        </div>
+                        <div style={{ color: '#e5e7eb', fontWeight: '500' }}>
+                          {new Date(userData.created_at).toLocaleDateString('de-DE')}
+                        </div>
+                      </div>
+                      
+                      <div style={{ 
+                        background: 'rgba(255,255,255,.05)', 
+                        padding: '12px', 
+                        borderRadius: '8px' 
+                      }}>
+                        <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '4px' }}>
+                          Status
+                        </div>
+                        <div style={{ color: '#e5e7eb', fontWeight: '500' }}>
+                          <span style={{ 
+                            color: userData.status === 'active' ? '#16a34a' : '#ef4444' 
+                          }}>
+                            {userData.status === 'active' ? '✅ Aktiv' : '❌ Inaktiv'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ textAlign: 'center', color: '#9ca3af' }}>
+                    <div style={{ fontSize: '24px', marginBottom: '8px' }}>👤</div>
+                    <p>Profil wird geladen...</p>
+                  </div>
+                )}
+              </div>
+                        {/* Hauptfunktionen */}
             <div className="section">
               <h2>🚀 Schnellstart</h2>
               <div className="grid">
@@ -271,6 +399,7 @@ export default function DashboardPage() {
                   </a>
                 </div>
               </div>
+            </div>
             </div>
 
             {/* Beta-Features */}
