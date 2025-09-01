@@ -43,20 +43,27 @@ export default function AuthCallback() {
           // Erstelle oder aktualisiere Benutzerprofil
           try {
             const user = data.session.user
+            console.log('🔍 User data:', user)
+            
             const existingProfile = await UserService.getUserProfile(user.id)
+            console.log('🔍 Existing profile:', existingProfile)
             
             if (!existingProfile) {
+              console.log('🆕 Creating new user profile...')
               // Erstelle neues Benutzerprofil
-              await UserService.createUserProfile({
+              const newProfile = await UserService.createUserProfile({
                 user_id: user.id,
                 email: user.email || '',
                 full_name: user.user_metadata?.full_name || user.user_metadata?.name,
                 avatar_url: user.user_metadata?.avatar_url,
                 provider: user.app_metadata?.provider as 'google' | 'apple' | 'email'
               })
+              console.log('✅ New profile created:', newProfile)
+            } else {
+              console.log('✅ Profile already exists:', existingProfile)
             }
           } catch (error) {
-            console.error('Error creating user profile:', error)
+            console.error('❌ Error creating user profile:', error)
             // Trotzdem weiterleiten, auch wenn Profil-Erstellung fehlschlägt
           }
           
@@ -87,20 +94,27 @@ export default function AuthCallback() {
           // Erstelle oder aktualisiere Benutzerprofil
           try {
             const user = data.session.user
+            console.log('🔍 User data (fallback):', user)
+            
             const existingProfile = await UserService.getUserProfile(user.id)
+            console.log('🔍 Existing profile (fallback):', existingProfile)
             
             if (!existingProfile) {
+              console.log('🆕 Creating new user profile (fallback)...')
               // Erstelle neues Benutzerprofil
-              await UserService.createUserProfile({
+              const newProfile = await UserService.createUserProfile({
                 user_id: user.id,
                 email: user.email || '',
                 full_name: user.user_metadata?.full_name || user.user_metadata?.name,
                 avatar_url: user.user_metadata?.avatar_url,
                 provider: user.app_metadata?.provider as 'google' | 'apple' | 'email'
               })
+              console.log('✅ New profile created (fallback):', newProfile)
+            } else {
+              console.log('✅ Profile already exists (fallback):', existingProfile)
             }
           } catch (error) {
-            console.error('Error creating user profile:', error)
+            console.error('❌ Error creating user profile (fallback):', error)
             // Trotzdem weiterleiten, auch wenn Profil-Erstellung fehlschlägt
           }
           
