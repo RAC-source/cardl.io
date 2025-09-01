@@ -454,8 +454,8 @@ export default function DashboardPage() {
                   <a href="/api/test-db" className="btn btn-secondary">
                     🗄️ DB Test
                   </a>
-                  <a href="/api/test-user-creation" className="btn btn-secondary">
-                    👤 User Creation Test
+                  <a href="/api/test-email-validation" className="btn btn-secondary">
+                    📧 Email Validation Test
                   </a>
                   <a href="/api/test-email" className="btn btn-secondary">
                     📧 Email Test
