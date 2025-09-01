@@ -140,22 +140,37 @@ export default function AuthCallback() {
         
         setProvider(providerType)
         
-        // Erstelle oder aktualisiere Benutzerprofil
+        // Erstelle oder aktualisiere Benutzerprofil MANUELL (ohne Trigger)
         try {
           const existingProfile = await UserService.getUserProfile(user.id)
           console.log('🔍 Existing profile:', existingProfile)
           
           if (!existingProfile) {
-            console.log('🆕 Creating new user profile...')
-            // Erstelle neues Benutzerprofil
-            const newProfile = await UserService.createUserProfile({
-              user_id: user.id,
-              email: user.email || '',
-              full_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0],
-              avatar_url: user.user_metadata?.avatar_url,
-              provider: providerType as 'google' | 'apple' | 'email'
+            console.log('🆕 Creating new user profile manually...')
+            
+            // Erstelle Profil direkt über API (umgeht Trigger-Probleme)
+            const createResponse = await fetch('/api/create-profile', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                user_id: user.id,
+                email: user.email || '',
+                full_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0],
+                avatar_url: user.user_metadata?.avatar_url,
+                provider: providerType as 'google' | 'apple' | 'email'
+              })
             })
-            console.log('✅ New profile created:', newProfile)
+            
+            const createResult = await createResponse.json()
+            
+            if (createResponse.ok && createResult.success) {
+              console.log('✅ Profile created via API:', createResult)
+            } else {
+              console.error('❌ Profile creation via API failed:', createResult)
+              // Trotzdem weiterleiten, auch wenn Profil-Erstellung fehlschlägt
+            }
           } else {
             console.log('✅ Profile already exists:', existingProfile)
           }
