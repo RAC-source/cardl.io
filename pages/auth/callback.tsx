@@ -23,13 +23,23 @@ export default function AuthCallback() {
         const hashParams = new URLSearchParams(window.location.hash.substring(1))
         const accessToken = hashParams.get('access_token')
         const refreshToken = hashParams.get('refresh_token')
+        
+        // Apple-spezifische Parameter
+        const idToken = hashParams.get('id_token')
+        const state = hashParams.get('state')
 
-        if (accessToken) {
+        console.log('🔍 Hash parameters found:')
+        console.log('- access_token:', !!accessToken)
+        console.log('- refresh_token:', !!refreshToken)
+        console.log('- id_token:', !!idToken)
+        console.log('- state:', !!state)
+
+        if (accessToken || idToken) {
           console.log('🔍 OAuth callback detected with hash parameters')
           
           // OAuth-Callback mit Hash-Parametern
           const { data, error } = await supabase.auth.setSession({
-            access_token: accessToken,
+            access_token: accessToken || '',
             refresh_token: refreshToken || ''
           })
 
@@ -62,8 +72,21 @@ export default function AuthCallback() {
           return
         }
 
-        // Keine Session gefunden
+        // Keine Session gefunden - möglicherweise Apple OAuth Problem
         console.error('❌ No session found')
+        
+        // Prüfe URL-Parameter für Apple-spezifische Fehler
+        const urlParams = new URLSearchParams(window.location.search)
+        const errorParam = urlParams.get('error')
+        const errorDescription = urlParams.get('error_description')
+        
+        if (errorParam) {
+          console.error('❌ Apple OAuth error:', errorParam, errorDescription)
+          setStatus('error')
+          setMessage(`Apple Sign-In Fehler: ${errorDescription || errorParam}`)
+          return
+        }
+        
         setStatus('error')
         setMessage('Keine gültige Sitzung gefunden. Bitte versuchen Sie es erneut.')
 
