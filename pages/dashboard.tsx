@@ -1,11 +1,20 @@
 import Head from 'next/head'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
+import { UserService } from '../lib/userService'
+import { UserProfile } from '../types/user'
+import { supabase } from '../lib/supabaseClient'
 
 export default function DashboardPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
-  const [userData, setUserData] = useState<any>(null)
+  const [userData, setUserData] = useState<UserProfile | null>(null)
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    betaUsers: 0,
+    activeUsers: 0,
+    recentUsers: 0
+  })
 
   useEffect(() => {
     // Prüfe Login-Status
@@ -15,16 +24,34 @@ export default function DashboardPage() {
       return
     }
 
-    // Simuliere User-Daten laden
-    setTimeout(() => {
-      setUserData({
-        name: 'Beta Tester',
-        email: 'tester@cardl.io',
-        joinDate: '2025-01-15',
-        status: 'active'
-      })
-      setIsLoading(false)
-    }, 1000)
+    const loadUserData = async () => {
+      try {
+        // Lade Benutzerdaten aus Supabase
+        if (!supabase) {
+          console.error('Supabase client not available')
+          setIsLoading(false)
+          return
+        }
+
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session?.user) {
+          const profile = await UserService.getUserProfile(session.user.id)
+          if (profile) {
+            setUserData(profile)
+          }
+        }
+
+        // Lade Statistiken
+        const userStats = await UserService.getUserStats()
+        setStats(userStats)
+      } catch (error) {
+        console.error('Error loading user data:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadUserData()
   }, [router])
 
   const handleLogout = () => {
@@ -172,7 +199,7 @@ export default function DashboardPage() {
             </a>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
               <span style={{ fontSize: '14px', color: '#9ca3af' }}>
-                Willkommen, {userData?.name}
+                Willkommen, {userData?.full_name || userData?.email || 'Beta Tester'}
               </span>
               <button
                 onClick={handleLogout}
@@ -195,20 +222,20 @@ export default function DashboardPage() {
               <h2>📊 Übersicht</h2>
               <div className="stats-grid">
                 <div className="stat-card">
-                  <div className="stat-number">0</div>
-                  <div className="stat-label">Erstellte Karten</div>
+                  <div className="stat-number">{stats.betaUsers}</div>
+                  <div className="stat-label">Beta-Benutzer</div>
                 </div>
                 <div className="stat-card">
-                  <div className="stat-number">0</div>
-                  <div className="stat-label">Bestellungen</div>
+                  <div className="stat-number">{stats.recentUsers}</div>
+                  <div className="stat-label">Neue Benutzer (7 Tage)</div>
                 </div>
                 <div className="stat-card">
-                  <div className="stat-number">20%</div>
-                  <div className="stat-label">Beta-Rabatt</div>
+                  <div className="stat-number">{stats.activeUsers}</div>
+                  <div className="stat-label">Aktive Benutzer (30 Tage)</div>
                 </div>
                 <div className="stat-card">
-                  <div className="stat-number">∞</div>
-                  <div className="stat-label">Entwürfe</div>
+                  <div className="stat-number">{stats.totalUsers}</div>
+                  <div className="stat-label">Gesamte Benutzer</div>
                 </div>
               </div>
             </div>

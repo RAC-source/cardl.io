@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '../../lib/supabaseClient'
+import { UserService } from '../../lib/userService'
 import Head from 'next/head'
 
 export default function AuthCallback() {
@@ -35,19 +36,39 @@ export default function AuthCallback() {
             return
           }
 
-          if (data.session) {
-            // Setze Login-Status für Dashboard-Zugriff
-            localStorage.setItem('cardl-login', 'true')
+                  if (data.session) {
+          // Setze Login-Status für Dashboard-Zugriff
+          localStorage.setItem('cardl-login', 'true')
+          
+          // Erstelle oder aktualisiere Benutzerprofil
+          try {
+            const user = data.session.user
+            const existingProfile = await UserService.getUserProfile(user.id)
             
-            setStatus('success')
-            setMessage('🎉 Google-Anmeldung erfolgreich! Sie werden zum Dashboard weitergeleitet...')
-            
-            // Nach 2 Sekunden zum Dashboard weiterleiten
-            setTimeout(() => {
-              router.push('/dashboard')
-            }, 2000)
-            return
+            if (!existingProfile) {
+              // Erstelle neues Benutzerprofil
+              await UserService.createUserProfile({
+                user_id: user.id,
+                email: user.email || '',
+                full_name: user.user_metadata?.full_name || user.user_metadata?.name,
+                avatar_url: user.user_metadata?.avatar_url,
+                provider: user.app_metadata?.provider as 'google' | 'apple' | 'email'
+              })
+            }
+          } catch (error) {
+            console.error('Error creating user profile:', error)
+            // Trotzdem weiterleiten, auch wenn Profil-Erstellung fehlschlägt
           }
+          
+          setStatus('success')
+          setMessage('🎉 Google-Anmeldung erfolgreich! Sie werden zum Dashboard weitergeleitet...')
+          
+          // Nach 2 Sekunden zum Dashboard weiterleiten
+          setTimeout(() => {
+            router.push('/dashboard')
+          }, 2000)
+          return
+        }
         }
 
         // Fallback: Prüfe bestehende Session
@@ -62,6 +83,26 @@ export default function AuthCallback() {
         if (data.session) {
           // Setze Login-Status für Dashboard-Zugriff
           localStorage.setItem('cardl-login', 'true')
+          
+          // Erstelle oder aktualisiere Benutzerprofil
+          try {
+            const user = data.session.user
+            const existingProfile = await UserService.getUserProfile(user.id)
+            
+            if (!existingProfile) {
+              // Erstelle neues Benutzerprofil
+              await UserService.createUserProfile({
+                user_id: user.id,
+                email: user.email || '',
+                full_name: user.user_metadata?.full_name || user.user_metadata?.name,
+                avatar_url: user.user_metadata?.avatar_url,
+                provider: user.app_metadata?.provider as 'google' | 'apple' | 'email'
+              })
+            }
+          } catch (error) {
+            console.error('Error creating user profile:', error)
+            // Trotzdem weiterleiten, auch wenn Profil-Erstellung fehlschlägt
+          }
           
           setStatus('success')
           setMessage('✅ Anmeldung erfolgreich! Sie werden zum Dashboard weitergeleitet...')
