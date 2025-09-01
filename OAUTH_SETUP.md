@@ -15,6 +15,16 @@ Die Authentifizierung verwendet Supabase mit folgenden OAuth-Providern:
 2. **Google Cloud Console** Account
 3. **Apple Developer Account** (für Apple Sign-In)
 4. **Domain** (cardl.io)
+5. **Vercel/Hosting** - cardl.io muss bereits live sein
+
+## ⚠️ Wichtig für Produktionsumgebung
+
+**Alle URLs in dieser Anleitung sind für die Live-Domain `https://cardl.io` konfiguriert.**
+
+Stellen Sie sicher, dass:
+- ✅ cardl.io bereits auf Ihrer Hosting-Plattform (Vercel) deployed ist
+- ✅ HTTPS korrekt funktioniert
+- ✅ Die Callback-URL `https://cardl.io/auth/callback` erreichbar ist
 
 ## 🔧 Google OAuth Setup
 
@@ -56,7 +66,14 @@ Authorized redirect URIs:
    - Toggle "Enable"
    - Client ID: Ihre Google Client ID
    - Client Secret: Ihr Google Client Secret
-   - Redirect URL: `https://cardl.io/auth/callback`
+
+3. **Konfigurieren Sie Site URL:**
+   - Gehen Sie zu: Authentication → Settings
+   - Site URL: `https://cardl.io`
+   - Additional Redirect URLs: `https://cardl.io/auth/callback`
+
+**⚠️ Wichtig:** Die Supabase-eigene Callback-URL wird automatisch generiert:
+`https://yourproject.supabase.co/auth/v1/callback` - Diese muss auch in der Google Cloud Console eingetragen werden!
 
 ## 🍎 Apple Sign-In Setup
 
