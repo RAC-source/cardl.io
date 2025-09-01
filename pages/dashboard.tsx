@@ -454,8 +454,8 @@ export default function DashboardPage() {
                   <a href="/api/test-db" className="btn btn-secondary">
                     🗄️ DB Test
                   </a>
-                  <a href="/api/check-db" className="btn btn-secondary">
-                    🔍 DB Status
+                  <a href="/api/check-service-role" className="btn btn-secondary">
+                    🔑 Service Role Check
                   </a>
                   <a href="/api/test-email" className="btn btn-secondary">
                     📧 Email Test

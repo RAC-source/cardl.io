@@ -8,6 +8,7 @@ export default function AuthCallback() {
   const router = useRouter()
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [message, setMessage] = useState('')
+  const [provider, setProvider] = useState<string>('')
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -18,12 +19,14 @@ export default function AuthCallback() {
           return
         }
 
-        // Prüfe Hash-Parameter für OAuth-Callback
+        // Prüfe Hash-Parameter für OAuth-Callback (Google, Apple)
         const hashParams = new URLSearchParams(window.location.hash.substring(1))
         const accessToken = hashParams.get('access_token')
         const refreshToken = hashParams.get('refresh_token')
 
         if (accessToken) {
+          console.log('🔍 OAuth callback detected with hash parameters')
+          
           // OAuth-Callback mit Hash-Parametern
           const { data, error } = await supabase.auth.setSession({
             access_token: accessToken,
@@ -31,108 +34,95 @@ export default function AuthCallback() {
           })
 
           if (error) {
+            console.error('❌ OAuth session error:', error)
             setStatus('error')
             setMessage('OAuth-Authentifizierung fehlgeschlagen: ' + error.message)
             return
           }
 
-                  if (data.session) {
-          // Setze Login-Status für Dashboard-Zugriff
-          localStorage.setItem('cardl-login', 'true')
-          
-          // Erstelle oder aktualisiere Benutzerprofil
-          try {
-            const user = data.session.user
-            console.log('🔍 User data:', user)
-            
-            const existingProfile = await UserService.getUserProfile(user.id)
-            console.log('🔍 Existing profile:', existingProfile)
-            
-            if (!existingProfile) {
-              console.log('🆕 Creating new user profile...')
-              // Erstelle neues Benutzerprofil
-              const newProfile = await UserService.createUserProfile({
-                user_id: user.id,
-                email: user.email || '',
-                full_name: user.user_metadata?.full_name || user.user_metadata?.name,
-                avatar_url: user.user_metadata?.avatar_url,
-                provider: user.app_metadata?.provider as 'google' | 'apple' | 'email'
-              })
-              console.log('✅ New profile created:', newProfile)
-            } else {
-              console.log('✅ Profile already exists:', existingProfile)
-            }
-          } catch (error) {
-            console.error('❌ Error creating user profile:', error)
-            // Trotzdem weiterleiten, auch wenn Profil-Erstellung fehlschlägt
+          if (data.session) {
+            await handleSuccessfulAuth(data.session)
+            return
           }
-          
-          setStatus('success')
-          setMessage('🎉 Google-Anmeldung erfolgreich! Sie werden zum Dashboard weitergeleitet...')
-          
-          // Nach 2 Sekunden zum Dashboard weiterleiten
-          setTimeout(() => {
-            router.push('/dashboard')
-          }, 2000)
-          return
-        }
         }
 
-        // Fallback: Prüfe bestehende Session
+        // Fallback: Prüfe bestehende Session (Magic Link, etc.)
+        console.log('🔍 Checking existing session...')
         const { data, error } = await supabase.auth.getSession()
         
         if (error) {
+          console.error('❌ Session error:', error)
           setStatus('error')
           setMessage('Authentifizierung fehlgeschlagen: ' + error.message)
           return
         }
 
         if (data.session) {
-          // Setze Login-Status für Dashboard-Zugriff
-          localStorage.setItem('cardl-login', 'true')
-          
-          // Erstelle oder aktualisiere Benutzerprofil
-          try {
-            const user = data.session.user
-            console.log('🔍 User data (fallback):', user)
-            
-            const existingProfile = await UserService.getUserProfile(user.id)
-            console.log('🔍 Existing profile (fallback):', existingProfile)
-            
-            if (!existingProfile) {
-              console.log('🆕 Creating new user profile (fallback)...')
-              // Erstelle neues Benutzerprofil
-              const newProfile = await UserService.createUserProfile({
-                user_id: user.id,
-                email: user.email || '',
-                full_name: user.user_metadata?.full_name || user.user_metadata?.name,
-                avatar_url: user.user_metadata?.avatar_url,
-                provider: user.app_metadata?.provider as 'google' | 'apple' | 'email'
-              })
-              console.log('✅ New profile created (fallback):', newProfile)
-            } else {
-              console.log('✅ Profile already exists (fallback):', existingProfile)
-            }
-          } catch (error) {
-            console.error('❌ Error creating user profile (fallback):', error)
-            // Trotzdem weiterleiten, auch wenn Profil-Erstellung fehlschlägt
-          }
-          
-          setStatus('success')
-          setMessage('✅ Anmeldung erfolgreich! Sie werden zum Dashboard weitergeleitet...')
-          
-          // Nach 2 Sekunden zum Dashboard weiterleiten
-          setTimeout(() => {
-            router.push('/dashboard')
-          }, 2000)
-        } else {
-          setStatus('error')
-          setMessage('❌ Keine gültige Sitzung gefunden. Bitte versuchen Sie es erneut.')
+          await handleSuccessfulAuth(data.session)
+          return
         }
-      } catch (error) {
-        console.error('Auth callback error:', error)
+
+        // Keine Session gefunden
+        console.error('❌ No session found')
         setStatus('error')
-        setMessage('❌ Ein unerwarteter Fehler ist aufgetreten.')
+        setMessage('Keine gültige Sitzung gefunden. Bitte versuchen Sie es erneut.')
+
+      } catch (error) {
+        console.error('❌ Auth callback error:', error)
+        setStatus('error')
+        setMessage('Ein unerwarteter Fehler ist aufgetreten.')
+      }
+    }
+
+    const handleSuccessfulAuth = async (session: any) => {
+      try {
+        // Setze Login-Status für Dashboard-Zugriff
+        localStorage.setItem('cardl-login', 'true')
+        
+        const user = session.user
+        const providerType = user.app_metadata?.provider || 'unknown'
+        
+        console.log('🔍 User data:', user)
+        console.log('🔍 Provider:', providerType)
+        
+        setProvider(providerType)
+        
+        // Erstelle oder aktualisiere Benutzerprofil
+        try {
+          const existingProfile = await UserService.getUserProfile(user.id)
+          console.log('🔍 Existing profile:', existingProfile)
+          
+          if (!existingProfile) {
+            console.log('🆕 Creating new user profile...')
+            // Erstelle neues Benutzerprofil
+            const newProfile = await UserService.createUserProfile({
+              user_id: user.id,
+              email: user.email || '',
+              full_name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0],
+              avatar_url: user.user_metadata?.avatar_url,
+              provider: providerType as 'google' | 'apple' | 'email'
+            })
+            console.log('✅ New profile created:', newProfile)
+          } else {
+            console.log('✅ Profile already exists:', existingProfile)
+          }
+        } catch (error) {
+          console.error('❌ Error creating user profile:', error)
+          // Trotzdem weiterleiten, auch wenn Profil-Erstellung fehlschlägt
+        }
+        
+        setStatus('success')
+        setMessage(`🎉 ${providerType === 'google' ? 'Google' : providerType === 'apple' ? 'Apple' : 'E-Mail'}-Anmeldung erfolgreich! Sie werden zum Dashboard weitergeleitet...`)
+        
+        // Nach 2 Sekunden zum Dashboard weiterleiten
+        setTimeout(() => {
+          router.push('/dashboard')
+        }, 2000)
+        
+      } catch (error) {
+        console.error('❌ Error in successful auth:', error)
+        setStatus('error')
+        setMessage('Fehler beim Verarbeiten der Anmeldung.')
       }
     }
 
@@ -143,133 +133,63 @@ export default function AuthCallback() {
     <>
       <Head>
         <title>Anmeldung - cardl.io</title>
-        <meta name="description" content="cardl.io Authentifizierung" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-        <style>{`
-          :root{
-            --bg: #0b1220;
-            --fg: #e5e7eb;
-            --muted: #9ca3af;
-            --primary: #2563eb;
-            --accent: #16a34a;
-            --card: rgba(255,255,255,0.06);
-            --ring: rgba(37, 99, 235, .45);
-          }
-          *{box-sizing:border-box}
-          html,body,#__next{height:100%}
-          body{
-            margin:0;
-            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji;
-            color:var(--fg);
-            background: radial-gradient(1200px 600px at 70% -10%, rgba(37,99,235,.25), transparent 60%),
-                        radial-gradient(1000px 600px at -10% 110%, rgba(22,163,74,.2), transparent 60%),
-                        var(--bg);
-          }
-          a{color:inherit}
-          .wrap{
-            min-height:100%;
-            display:grid;
-            place-items:center;
-            padding:48px 20px;
-          }
-          .card{
-            width:min(480px, 100%);
-            background:var(--card);
-            backdrop-filter: blur(8px);
-            border:1px solid rgba(255,255,255,.08);
-            border-radius:24px;
-            padding:32px;
-            box-shadow: 0 10px 40px rgba(0,0,0,.35);
-            text-align: center;
-          }
-          .logo{
-            width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
-            background:linear-gradient(135deg, var(--primary), var(--accent));
-            box-shadow: inset 0 0 0 1px rgba(255,255,255,.2);
-            font-weight:800;
-            margin: 0 auto 20px auto;
-          }
-          .chip{width:14px;height:10px;border:2px solid #fff;border-radius:2px;opacity:.9}
-          .spinner{
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(37,99,235,.2);
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 16px auto;
-          }
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-          h1{margin:12px 0 8px;font-size: clamp(20px, 4vw, 28px);color:var(--fg)}
-          p{margin:0;color:var(--muted);line-height:1.6;font-size:14px}
-          .btn{
-            background:linear-gradient(135deg,var(--primary),#1d4ed8);
-            color:white;border:none;border-radius:12px;padding:12px 20px;font-weight:600;cursor:pointer;
-            text-decoration:none;display:inline-block;margin-top:16px;font-size:14px
-          }
-        `}</style>
       </Head>
-
-      <div className="wrap">
-        <div className="card">
-          <div className="logo">
-            <div className="chip" />
-          </div>
-
+      
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        fontFamily: 'system-ui, -apple-system, sans-serif'
+      }}>
+        <div style={{
+          background: 'rgba(255,255,255,.1)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255,255,255,.2)',
+          borderRadius: '20px',
+          padding: '40px',
+          textAlign: 'center',
+          maxWidth: '400px',
+          width: '90%'
+        }}>
           {status === 'loading' && (
             <>
-              <div className="spinner"></div>
-              <h1>🔐 Authentifizierung läuft...</h1>
-              <p>Bitte warten Sie, während wir Sie anmelden.</p>
+              <div style={{ fontSize: '48px', marginBottom: '20px' }}>⏳</div>
+              <h2 style={{ color: '#e5e7eb', marginBottom: '10px' }}>Anmeldung läuft...</h2>
+              <p style={{ color: '#d1d5db' }}>Bitte warten Sie, während wir Sie anmelden.</p>
             </>
           )}
-
+          
           {status === 'success' && (
             <>
-              <div style={{ 
-                fontSize: '48px', 
-                marginBottom: '16px',
-                background: 'linear-gradient(135deg, #16a34a, #15803d)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}>
-                ✅
-              </div>
-              <h1>Anmeldung erfolgreich!</h1>
-              <p style={{ marginBottom: '16px' }}>{message}</p>
-              <a href="/dashboard" className="btn">
-                🚀 Jetzt zum Dashboard
-              </a>
+              <div style={{ fontSize: '48px', marginBottom: '20px' }}>✅</div>
+              <h2 style={{ color: '#e5e7eb', marginBottom: '10px' }}>
+                {provider === 'google' ? 'Google' : provider === 'apple' ? 'Apple' : 'E-Mail'}-Anmeldung erfolgreich!
+              </h2>
+              <p style={{ color: '#d1d5db' }}>{message}</p>
             </>
           )}
-
+          
           {status === 'error' && (
             <>
-              <div style={{ 
-                fontSize: '48px', 
-                marginBottom: '16px',
-                color: '#ef4444'
-              }}>
-                ❌
-              </div>
-              <h1>Anmeldung fehlgeschlagen</h1>
-              <p style={{ marginBottom: '16px' }}>{message}</p>
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                <a href="/auth/login" className="btn">
-                  🔄 Erneut versuchen
-                </a>
-                <a href="/" className="btn" style={{ 
-                  background: 'rgba(255,255,255,.1)',
-                  border: '1px solid rgba(255,255,255,.2)'
-                }}>
-                  🏠 Startseite
-                </a>
-              </div>
+              <div style={{ fontSize: '48px', marginBottom: '20px' }}>❌</div>
+              <h2 style={{ color: '#e5e7eb', marginBottom: '10px' }}>Anmeldung fehlgeschlagen</h2>
+              <p style={{ color: '#d1d5db', marginBottom: '20px' }}>{message}</p>
+              <button
+                onClick={() => router.push('/auth/login')}
+                style={{
+                  background: 'rgba(37,99,235,.8)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '16px'
+                }}
+              >
+                Zurück zum Login
+              </button>
             </>
           )}
         </div>

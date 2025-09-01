@@ -30,8 +30,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
       console.error('❌ Service Role Key not available')
-      return res.status(500).json({ error: 'Service Role Key not configured' })
+      return res.status(500).json({ 
+        error: 'Service Role Key not configured',
+        hint: 'Please add SUPABASE_SERVICE_ROLE_KEY to your environment variables'
+      })
     }
+
+    console.log('🔑 Using Service Role Key for registration')
+    console.log('📧 Email:', email)
+    console.log('👤 Full Name:', full_name)
 
     // Erstelle neuen Benutzer mit Service Role Key
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
