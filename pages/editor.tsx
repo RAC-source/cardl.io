@@ -90,106 +90,125 @@ export default function EditorPage() {
       
       // Berechne verfügbaren Platz
       const padding = 20 * scale
-      const maxWidth = canvas!.width - (padding * 2)
       const qrSize = 60 * scale
       const qrX = canvas!.width - qrSize - padding
       const qrY = canvas!.height - qrSize - padding
       const textAreaWidth = qrX - (padding * 2)
       
-      // Hilfsfunktion für Text-Wrapping
-      function wrapText(text: string, maxWidth: number, fontSize: number, fontFamily: string) {
-        ctx!.font = `${fontSize}px ${fontFamily}`
+      // Hilfsfunktion für optimale Schriftgröße
+      function getOptimalFontSize(text: string, maxWidth: number, maxHeight: number, fontFamily: string, isBold: boolean = false) {
+        let fontSize = 20 * scale
+        const minFontSize = 8 * scale
+        
+        while (fontSize > minFontSize) {
+          ctx!.font = `${isBold ? 'bold' : 'normal'} ${fontSize}px ${fontFamily}`
+          const metrics = ctx!.measureText(text)
+          
+          if (metrics.width <= maxWidth && fontSize <= maxHeight) {
+            return fontSize
+          }
+          fontSize -= 1 * scale
+        }
+        return minFontSize
+      }
+      
+      // Hilfsfunktion für Text-Wrapping nur wenn nötig
+      function wrapTextIfNeeded(text: string, maxWidth: number, fontSize: number, fontFamily: string, isBold: boolean = false) {
+        ctx!.font = `${isBold ? 'bold' : 'normal'} ${fontSize}px ${fontFamily}`
+        const metrics = ctx!.measureText(text)
+        
+        if (metrics.width <= maxWidth) {
+          return [{ text, fontSize }]
+        }
+        
+        // Nur umbrechen wenn absolut nötig
         const words = text.split(' ')
-        const lines: string[] = []
+        const lines: { text: string, fontSize: number }[] = []
         let currentLine = words[0]
         
         for (let i = 1; i < words.length; i++) {
           const word = words[i]
-          const width = ctx!.measureText(currentLine + ' ' + word).width
-          if (width < maxWidth) {
-            currentLine += ' ' + word
+          const testLine = currentLine + ' ' + word
+          const width = ctx!.measureText(testLine).width
+          
+          if (width <= maxWidth) {
+            currentLine = testLine
           } else {
-            lines.push(currentLine)
+            lines.push({ text: currentLine, fontSize })
             currentLine = word
           }
         }
-        lines.push(currentLine)
+        lines.push({ text: currentLine, fontSize })
         return lines
       }
       
-      // Name
+      let currentY = padding
+      
+      // Name - maximale Flexibilität
       if (cardData.name) {
-        const nameFontSize = 20 * scale
-        const nameLines = wrapText(cardData.name, textAreaWidth, nameFontSize, cardData.fontFamily)
-        ctx.font = `bold ${nameFontSize}px ${cardData.fontFamily}`
-        ctx.fillStyle = cardData.textColor
+        const availableHeight = canvas!.height - (padding * 2) - qrSize
+        const nameFontSize = getOptimalFontSize(cardData.name, textAreaWidth, availableHeight * 0.3, cardData.fontFamily, true)
+        const nameLines = wrapTextIfNeeded(cardData.name, textAreaWidth, nameFontSize, cardData.fontFamily, true)
         
         nameLines.forEach((line, index) => {
-          ctx.fillText(line, padding, padding + (index * (nameFontSize + 4)))
+          ctx.font = `bold ${line.fontSize}px ${cardData.fontFamily}`
+          ctx.fillStyle = cardData.textColor
+          ctx.fillText(line.text, padding, currentY)
+          currentY += line.fontSize + (4 * scale)
         })
+        currentY += 8 * scale
       }
       
-      // Titel
+      // Titel - anpassbar
       if (cardData.title) {
-        const titleFontSize = 14 * scale
-        const titleLines = wrapText(cardData.title, textAreaWidth, titleFontSize, cardData.fontFamily)
-        ctx.font = `${titleFontSize}px ${cardData.fontFamily}`
-        ctx.fillStyle = cardData.textColor + 'CC'
-        
-        const nameHeight = cardData.name ? (wrapText(cardData.name, textAreaWidth, 20 * scale, cardData.fontFamily).length * (20 * scale + 4)) : 0
-        const titleY = padding + nameHeight + (10 * scale)
+        const remainingHeight = canvas!.height - currentY - qrSize - padding
+        const titleFontSize = getOptimalFontSize(cardData.title, textAreaWidth, remainingHeight * 0.25, cardData.fontFamily)
+        const titleLines = wrapTextIfNeeded(cardData.title, textAreaWidth, titleFontSize, cardData.fontFamily)
         
         titleLines.forEach((line, index) => {
-          ctx.fillText(line, padding, titleY + (index * (titleFontSize + 2)))
+          ctx.font = `${line.fontSize}px ${cardData.fontFamily}`
+          ctx.fillStyle = cardData.textColor + 'CC'
+          ctx.fillText(line.text, padding, currentY)
+          currentY += line.fontSize + (2 * scale)
         })
+        currentY += 6 * scale
       }
       
-      // Firma
+      // Firma - anpassbar
       if (cardData.company) {
-        const companyFontSize = 16 * scale
-        const companyLines = wrapText(cardData.company, textAreaWidth, companyFontSize, cardData.fontFamily)
-        ctx.font = `bold ${companyFontSize}px ${cardData.fontFamily}`
-        ctx.fillStyle = cardData.textColor
-        
-        const nameHeight = cardData.name ? (wrapText(cardData.name, textAreaWidth, 20 * scale, cardData.fontFamily).length * (20 * scale + 4)) : 0
-        const titleHeight = cardData.title ? (wrapText(cardData.title, textAreaWidth, 14 * scale, cardData.fontFamily).length * (14 * scale + 2)) : 0
-        const companyY = padding + nameHeight + titleHeight + (20 * scale)
+        const remainingHeight = canvas!.height - currentY - qrSize - padding
+        const companyFontSize = getOptimalFontSize(cardData.company, textAreaWidth, remainingHeight * 0.25, cardData.fontFamily, true)
+        const companyLines = wrapTextIfNeeded(cardData.company, textAreaWidth, companyFontSize, cardData.fontFamily, true)
         
         companyLines.forEach((line, index) => {
-          ctx.fillText(line, padding, companyY + (index * (companyFontSize + 2)))
+          ctx.font = `bold ${line.fontSize}px ${cardData.fontFamily}`
+          ctx.fillStyle = cardData.textColor
+          ctx.fillText(line.text, padding, currentY)
+          currentY += line.fontSize + (2 * scale)
         })
+        currentY += 8 * scale
       }
       
-      // Kontaktdaten
-      const contactFontSize = 12 * scale
-      ctx.font = `${contactFontSize}px ${cardData.fontFamily}`
-      ctx.fillStyle = cardData.textColor + 'CC'
-      
-      // Berechne Y-Position für Kontaktdaten
-      let contactY = padding
-      if (cardData.name) {
-        contactY += wrapText(cardData.name, textAreaWidth, 20 * scale, cardData.fontFamily).length * (20 * scale + 4)
-      }
-      if (cardData.title) {
-        contactY += wrapText(cardData.title, textAreaWidth, 14 * scale, cardData.fontFamily).length * (14 * scale + 2) + 10 * scale
-      }
-      if (cardData.company) {
-        contactY += wrapText(cardData.company, textAreaWidth, 16 * scale, cardData.fontFamily).length * (16 * scale + 2) + 10 * scale
-      }
-      contactY += 20 * scale
-      
-      // Kontaktdaten mit Icons
+      // Kontaktdaten - kompakt und flexibel
       const contactItems = []
       if (cardData.email) contactItems.push(`📧 ${cardData.email}`)
       if (cardData.phone) contactItems.push(`📞 ${cardData.phone}`)
       if (cardData.website) contactItems.push(`🌐 ${cardData.website}`)
       if (cardData.address) contactItems.push(`📍 ${cardData.address}`)
       
+      const remainingHeight = canvas!.height - currentY - qrSize - padding
+      const contactFontSize = Math.min(12 * scale, remainingHeight / (contactItems.length + 1))
+      
       contactItems.forEach((item, index) => {
-        const lines = wrapText(item, textAreaWidth, contactFontSize, cardData.fontFamily)
-        lines.forEach((line, lineIndex) => {
-          ctx.fillText(line, padding, contactY + (index * (contactFontSize + 8)) + (lineIndex * (contactFontSize + 2)))
+        const itemLines = wrapTextIfNeeded(item, textAreaWidth, contactFontSize, cardData.fontFamily)
+        
+        itemLines.forEach((line, lineIndex) => {
+          ctx.font = `${line.fontSize}px ${cardData.fontFamily}`
+          ctx.fillStyle = cardData.textColor + 'CC'
+          ctx.fillText(line.text, padding, currentY)
+          currentY += line.fontSize + (2 * scale)
         })
+        currentY += 2 * scale
       })
       
       // QR-Code Platzhalter (rechts)
