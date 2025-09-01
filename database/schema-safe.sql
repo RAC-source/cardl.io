@@ -1,6 +1,15 @@
 -- cardl.io Database Schema (Alternative - ohne Datenverlust)
 -- User Management für Beta-Zugang
 
+-- Lösche bestehende Trigger falls vorhanden
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+
+-- Lösche bestehende Funktionen falls vorhanden
+DROP FUNCTION IF EXISTS create_user_profile() CASCADE;
+DROP FUNCTION IF EXISTS check_beta_access(TEXT) CASCADE;
+DROP FUNCTION IF EXISTS grant_beta_access(TEXT) CASCADE;
+DROP FUNCTION IF EXISTS update_updated_at_column() CASCADE;
+
 -- Prüfe ob Tabelle existiert und füge fehlende Spalten hinzu
 DO $$ 
 BEGIN

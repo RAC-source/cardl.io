@@ -22,6 +22,15 @@ Führen Sie `database/schema-safe.sql` in Supabase aus:
 
 **✅ Vorteil:** Bestehende Daten bleiben erhalten, fehlende Spalten werden hinzugefügt.
 
+### Option 3: Cleanup + Neuinstallation (Bei "already exists" Fehlern)
+
+Wenn Sie Fehler wie "trigger already exists" bekommen:
+
+1. **Führen Sie zuerst** `database/cleanup.sql` aus
+2. **Dann führen Sie** `database/schema.sql` aus
+
+**🔧 Lösung:** Dies löscht alle Trigger/Funktionen und erstellt sie neu.
+
 ## 🔧 Nach der Einrichtung
 
 ### 1. RLS-Policies prüfen
@@ -61,6 +70,13 @@ DROP TABLE IF EXISTS user_profiles CASCADE;
 ```
 
 Dann führen Sie `database/schema.sql` aus.
+
+### "trigger already exists"
+
+**Lösung:** Verwenden Sie das Cleanup-Script:
+
+1. **Führen Sie** `database/cleanup.sql` aus
+2. **Dann führen Sie** `database/schema.sql` aus
 
 ### "function create_user_profile() does not exist"
 
