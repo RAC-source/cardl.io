@@ -124,17 +124,24 @@ export default function AuthForm() {
 
       if (response.ok && result.success) {
         console.log('✅ Registration successful:', result)
-        setMessage('✅ Registrierung erfolgreich! Sie werden automatisch angemeldet...')
-        setEmail('')
-        setIsRegistration(false)
         
-        // Automatische Anmeldung nach erfolgreicher Registrierung
-        setTimeout(() => {
-          // Setze Login-Status
-          localStorage.setItem('cardl-login', 'true')
-          // Weiterleitung zum Dashboard
-          window.location.href = '/dashboard'
-        }, 2000)
+        if (result.method === 'magicLink') {
+          setMessage('✅ Magic Link wurde gesendet! Prüfen Sie Ihren Posteingang und klicken Sie auf den Link zur Registrierung.')
+        } else {
+          setMessage('✅ Registrierung erfolgreich! Sie werden automatisch angemeldet...')
+          
+          // Automatische Anmeldung nach erfolgreicher Registrierung
+          setTimeout(() => {
+            // Setze Login-Status
+            localStorage.setItem('cardl-login', 'true')
+            // Weiterleitung zum Dashboard
+            window.location.href = '/dashboard'
+          }, 2000)
+        }
+        
+        setEmail('')
+        setPassword('')
+        setIsRegistration(false)
       } else {
         console.error('❌ Registration failed:', result)
         setMessage(`❌ Registrierung fehlgeschlagen: ${result.error}`)

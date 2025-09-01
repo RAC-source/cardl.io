@@ -23,11 +23,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     console.log('🆕 Processing registration for:', email)
-    console.log('🔑 Using normal signUp (not admin) for registration')
+    console.log('🔑 Using Magic Link fallback for registration')
     console.log('📧 Email:', email)
     console.log('👤 Full Name:', full_name || email.split('@')[0])
 
-    // Erstelle normalen Supabase Client (nicht admin)
+    // Erstelle normalen Supabase Client
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -38,68 +38,122 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ error: 'Supabase client not available' })
     }
 
-    // Verwende normale signUp statt admin.createUser
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password: password, // Verwende das echte Passwort
-      options: {
-        data: {
+    // Versuche zuerst normale signUp
+    try {
+      console.log('🧪 Attempting normal signUp...')
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password: password,
+        options: {
+          data: {
+            full_name: full_name || email.split('@')[0],
+            provider: 'email'
+          }
+        }
+      })
+
+      if (authError) {
+        console.error('❌ Normal signUp failed:', authError.message)
+        throw authError
+      }
+
+      if (!authData.user) {
+        console.error('❌ No user data returned from signUp')
+        throw new Error('No user data returned')
+      }
+
+      console.log('✅ User created successfully via signUp:', authData.user.id)
+
+      // Erstelle Benutzer-Profil
+      try {
+        const profile = await UserService.createUserProfile({
+          user_id: authData.user.id,
+          email: authData.user.email || '',
           full_name: full_name || email.split('@')[0],
           provider: 'email'
-        }
+        })
+
+        console.log('✅ User profile created:', profile)
+
+        return res.status(200).json({
+          success: true,
+          message: 'User registered successfully',
+          method: 'signUp',
+          user: {
+            id: authData.user.id,
+            email: authData.user.email,
+            profile
+          }
+        })
+
+      } catch (profileError) {
+        console.error('❌ Error creating profile:', profileError)
+        
+        return res.status(200).json({
+          success: true,
+          message: 'User registered successfully (profile creation failed)',
+          method: 'signUp',
+          user: {
+            id: authData.user.id,
+            email: authData.user.email,
+            profile: null
+          },
+          warning: 'Profile creation failed'
+        })
       }
-    })
 
-    if (authError) {
-      console.error('❌ Error creating user:', authError)
-      return res.status(500).json({ 
-        error: 'Failed to create user',
-        details: authError.message 
-      })
-    }
-
-    if (!authData.user) {
-      console.error('❌ No user data returned')
-      return res.status(500).json({ error: 'No user data returned' })
-    }
-
-    console.log('✅ User created successfully:', authData.user.id)
-
-    // Erstelle Benutzer-Profil
-    try {
-      const profile = await UserService.createUserProfile({
-        user_id: authData.user.id,
-        email: authData.user.email || '',
-        full_name: full_name || email.split('@')[0],
-        provider: 'email'
-      })
-
-      console.log('✅ User profile created:', profile)
-
-      return res.status(200).json({
-        success: true,
-        message: 'User registered successfully',
-        user: {
-          id: authData.user.id,
-          email: authData.user.email,
-          profile
-        }
-      })
-
-    } catch (profileError) {
-      console.error('❌ Error creating profile:', profileError)
+    } catch (signUpError) {
+      console.log('🔄 signUp failed, trying Magic Link fallback...')
       
-      // Trotzdem erfolgreich, da Benutzer erstellt wurde
-      return res.status(200).json({
-        success: true,
-        message: 'User registered successfully (profile creation failed)',
-        user: {
-          id: authData.user.id,
-          email: authData.user.email,
-          profile: null
-        },
-        warning: 'Profile creation failed'
-      })
+      // Fallback: Verwende Magic Link für Registrierung
+      try {
+        const redirectUrl = process.env.NODE_ENV === 'production' 
+          ? 'https://cardl.io/auth/callback'
+          : `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`
+
+        const { data: magicData, error: magicError } = await supabase.auth.signInWithOtp({
+          email,
+          options: {
+            emailRedirectTo: redirectUrl,
+            data: {
+              full_name: full_name || email.split('@')[0],
+              provider: 'email',
+              is_registration: true
+            }
+          }
+        })
+
+        if (magicError) {
+          console.error('❌ Magic Link failed:', magicError.message)
+          return res.status(500).json({ 
+            error: 'Both signUp and Magic Link failed',
+            details: {
+              signUpError: signUpError instanceof Error ? signUpError.message : 'Unknown error',
+              magicError: magicError.message
+            }
+          })
+        }
+
+        console.log('✅ Magic Link sent successfully')
+
+        return res.status(200).json({
+          success: true,
+          message: 'Magic Link sent for registration. Please check your email.',
+          method: 'magicLink',
+          email: email,
+          note: 'User will be created when they click the Magic Link'
+        })
+
+      } catch (magicError) {
+        console.error('❌ Magic Link fallback failed:', magicError)
+        return res.status(500).json({ 
+          error: 'All registration methods failed',
+          details: {
+            signUpError: signUpError instanceof Error ? signUpError.message : 'Unknown error',
+            magicError: magicError instanceof Error ? magicError.message : 'Unknown error'
+          }
+        })
+      }
     }
 
   } catch (error) {
