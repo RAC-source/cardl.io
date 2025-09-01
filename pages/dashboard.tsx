@@ -454,8 +454,8 @@ export default function DashboardPage() {
                   <a href="/api/test-db" className="btn btn-secondary">
                     🗄️ DB Test
                   </a>
-                  <a href="/api/debug-apple-signin" className="btn btn-secondary">
-                    🐛 Apple Debug
+                  <a href="/api/test-apple-config" className="btn btn-secondary">
+                    🍎 Config Test
                   </a>
                   <a href="/api/test-email" className="btn btn-secondary">
                     📧 Email Test
