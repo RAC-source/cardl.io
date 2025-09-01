@@ -55,7 +55,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // 4. Versuche einen Test-Eintrag zu erstellen
     const testUser = {
-      user_id: 'test-user-id-' + Date.now(),
+      user_id: '00000000-0000-0000-0000-000000000000', // Gültige UUID
       email: 'test@example.com',
       full_name: 'Test User',
       provider: 'test',
