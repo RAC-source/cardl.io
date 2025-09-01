@@ -34,25 +34,67 @@ export default function AuthCallback() {
         console.log('- id_token:', !!idToken)
         console.log('- state:', !!state)
 
-        if (accessToken || idToken) {
-          console.log('🔍 OAuth callback detected with hash parameters')
+        // Prüfe auch URL-Parameter für Apple (manchmal werden sie dort gesendet)
+        const urlParams = new URLSearchParams(window.location.search)
+        const code = urlParams.get('code')
+        const errorParam = urlParams.get('error')
+        const errorDescription = urlParams.get('error_description')
+
+        console.log('🔍 URL parameters found:')
+        console.log('- code:', !!code)
+        console.log('- error:', errorParam)
+        console.log('- error_description:', errorDescription)
+
+        if (errorParam) {
+          console.error('❌ Apple OAuth error:', errorParam, errorDescription)
+          setStatus('error')
+          setMessage(`Apple Sign-In Fehler: ${errorDescription || errorParam}`)
+          return
+        }
+
+        if (accessToken || idToken || code) {
+          console.log('🔍 OAuth callback detected with parameters')
           
-          // OAuth-Callback mit Hash-Parametern
-          const { data, error } = await supabase.auth.setSession({
-            access_token: accessToken || '',
-            refresh_token: refreshToken || ''
-          })
+          if (code) {
+            // Apple Sign-In mit Code-Parameter
+            console.log('🍎 Apple Sign-In with code parameter detected')
+            
+            // Versuche Session aus Code zu erstellen
+            try {
+              const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+              
+              if (error) {
+                console.error('❌ Apple code exchange error:', error)
+                setStatus('error')
+                setMessage('Apple Sign-In Code-Verarbeitung fehlgeschlagen: ' + error.message)
+                return
+              }
 
-          if (error) {
-            console.error('❌ OAuth session error:', error)
-            setStatus('error')
-            setMessage('OAuth-Authentifizierung fehlgeschlagen: ' + error.message)
-            return
-          }
+              if (data.session) {
+                await handleSuccessfulAuth(data.session)
+                return
+              }
+            } catch (error) {
+              console.error('❌ Apple code exchange exception:', error)
+            }
+          } else {
+            // Standard OAuth mit Token-Parametern
+            const { data, error } = await supabase.auth.setSession({
+              access_token: accessToken || '',
+              refresh_token: refreshToken || ''
+            })
 
-          if (data.session) {
-            await handleSuccessfulAuth(data.session)
-            return
+            if (error) {
+              console.error('❌ OAuth session error:', error)
+              setStatus('error')
+              setMessage('OAuth-Authentifizierung fehlgeschlagen: ' + error.message)
+              return
+            }
+
+            if (data.session) {
+              await handleSuccessfulAuth(data.session)
+              return
+            }
           }
         }
 
@@ -74,18 +116,6 @@ export default function AuthCallback() {
 
         // Keine Session gefunden - möglicherweise Apple OAuth Problem
         console.error('❌ No session found')
-        
-        // Prüfe URL-Parameter für Apple-spezifische Fehler
-        const urlParams = new URLSearchParams(window.location.search)
-        const errorParam = urlParams.get('error')
-        const errorDescription = urlParams.get('error_description')
-        
-        if (errorParam) {
-          console.error('❌ Apple OAuth error:', errorParam, errorDescription)
-          setStatus('error')
-          setMessage(`Apple Sign-In Fehler: ${errorDescription || errorParam}`)
-          return
-        }
         
         setStatus('error')
         setMessage('Keine gültige Sitzung gefunden. Bitte versuchen Sie es erneut.')
