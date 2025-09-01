@@ -2,18 +2,6 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { createClient } from '@supabase/supabase-js'
 import { UserService } from '../../lib/userService'
 
-// Erstelle Supabase Client mit Service Role Key für Admin-Operationen
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  }
-)
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
@@ -27,67 +15,87 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     console.log('🆕 Processing registration for:', email)
+    console.log('🔑 Using normal signUp (not admin) for registration')
+    console.log('📧 Email:', email)
+    console.log('👤 Full Name:', full_name || email.split('@')[0])
 
-    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.error('❌ Service Role Key not available')
-      return res.status(500).json({ 
-        error: 'Service Role Key not configured',
-        hint: 'Please add SUPABASE_SERVICE_ROLE_KEY to your environment variables'
-      })
+    // Erstelle normalen Supabase Client (nicht admin)
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+
+    if (!supabase) {
+      console.error('❌ Supabase client not available')
+      return res.status(500).json({ error: 'Supabase client not available' })
     }
 
-    console.log('🔑 Using Service Role Key for registration')
-    console.log('📧 Email:', email)
-    console.log('👤 Full Name:', full_name)
-
-    // Erstelle neuen Benutzer mit Service Role Key
-    const { data, error } = await supabaseAdmin.auth.admin.createUser({
+    // Verwende normale signUp statt admin.createUser
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
-      password: 'temporary-password-' + Math.random().toString(36).substr(2, 9),
-      email_confirm: true, // E-Mail automatisch bestätigen
-      user_metadata: {
-        full_name: full_name || '',
-        provider: 'email'
-      },
-      app_metadata: {
-        provider: 'email'
+      password: `temp-password-${Date.now()}`, // Temporäres Passwort
+      options: {
+        data: {
+          full_name: full_name || email.split('@')[0],
+          provider: 'email'
+        }
       }
     })
 
-    if (error) {
-      console.error('❌ Error creating user:', error)
-      return res.status(400).json({ error: error.message })
-    }
-
-    if (!data.user) {
-      console.error('❌ No user created')
-      return res.status(500).json({ error: 'Failed to create user' })
-    }
-
-    console.log('✅ User created:', data.user.id)
-
-    // Erstelle Benutzerprofil manuell
-    const profile = await UserService.createUserProfile({
-      user_id: data.user.id,
-      email: data.user.email || '',
-      full_name: full_name || '',
-      provider: 'email'
-    })
-
-    if (profile) {
-      console.log('✅ Profile created:', profile)
-      return res.status(200).json({ 
-        success: true, 
-        user: data.user,
-        profile: profile 
+    if (authError) {
+      console.error('❌ Error creating user:', authError)
+      return res.status(500).json({ 
+        error: 'Failed to create user',
+        details: authError.message 
       })
-    } else {
-      console.error('❌ Failed to create profile')
-      return res.status(500).json({ error: 'Failed to create profile' })
+    }
+
+    if (!authData.user) {
+      console.error('❌ No user data returned')
+      return res.status(500).json({ error: 'No user data returned' })
+    }
+
+    console.log('✅ User created successfully:', authData.user.id)
+
+    // Erstelle Benutzer-Profil
+    try {
+      const profile = await UserService.createUserProfile({
+        user_id: authData.user.id,
+        email: authData.user.email || '',
+        full_name: full_name || email.split('@')[0],
+        provider: 'email'
+      })
+
+      console.log('✅ User profile created:', profile)
+
+      return res.status(200).json({
+        success: true,
+        message: 'User registered successfully',
+        user: {
+          id: authData.user.id,
+          email: authData.user.email,
+          profile
+        }
+      })
+
+    } catch (profileError) {
+      console.error('❌ Error creating profile:', profileError)
+      
+      // Trotzdem erfolgreich, da Benutzer erstellt wurde
+      return res.status(200).json({
+        success: true,
+        message: 'User registered successfully (profile creation failed)',
+        user: {
+          id: authData.user.id,
+          email: authData.user.email,
+          profile: null
+        },
+        warning: 'Profile creation failed'
+      })
     }
 
   } catch (error) {
-    console.error('❌ Error in registration API:', error)
+    console.error('❌ Error in register API:', error)
     return res.status(500).json({ error: 'Internal server error' })
   }
 }
