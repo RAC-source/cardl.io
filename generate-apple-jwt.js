@@ -6,10 +6,10 @@ const fs = require('fs');
 // Apple Sign-In JWT Generator
 // Führen Sie dieses Script aus: node generate-apple-jwt.js
 
-const TEAM_ID = 'YOUR_TEAM_ID'; // Ersetzen Sie mit Ihrer Team ID
-const SERVICE_ID = 'YOUR_SERVICE_ID'; // Ersetzen Sie mit Ihrer Service ID
-const KEY_ID = 'YOUR_KEY_ID'; // Ersetzen Sie mit Ihrer Key ID
-const PRIVATE_KEY_PATH = './AuthKey_YOUR_KEY_ID.p8'; // Pfad zu Ihrer .p8 Datei
+const TEAM_ID = 'U7N8SHG9W6'; // Ersetzen Sie mit Ihrer Team ID
+const SERVICE_ID = 'io.cardl.web.signin'; // Ersetzen Sie mit Ihrer Service ID
+const KEY_ID = 'F924JM53WY'; // Ersetzen Sie mit Ihrer Key ID
+const PRIVATE_KEY_PATH = './AuthKey_F924JM53WY.p8'; // Pfad zu Ihrer .p8 Datei
 
 function generateAppleJWT() {
   try {
@@ -18,7 +18,7 @@ function generateAppleJWT() {
     
     // Erstelle JWT Header
     const header = {
-      alg: 'RS256',
+      alg: 'ES256',
       kid: KEY_ID,
       typ: 'JWT'
     };
