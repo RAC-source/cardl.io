@@ -1,8 +1,11 @@
 -- cardl.io Database Schema
 -- User Management für Beta-Zugang
 
+-- Lösche bestehende Tabelle falls vorhanden (VORSICHT: Löscht alle Daten!)
+DROP TABLE IF EXISTS user_profiles CASCADE;
+
 -- User Profile Tabelle
-CREATE TABLE IF NOT EXISTS user_profiles (
+CREATE TABLE user_profiles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT UNIQUE NOT NULL,
