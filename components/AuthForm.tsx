@@ -17,10 +17,15 @@ export default function AuthForm() {
         return
       }
 
+      // Bestimme die korrekte Redirect-URL basierend auf der Umgebung
+      const redirectUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://cardl.io/auth/callback'
+        : `${window.location.origin}/auth/callback`
+
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`
+          emailRedirectTo: redirectUrl
         }
       })
 
@@ -44,10 +49,15 @@ export default function AuthForm() {
         return
       }
 
+      // Bestimme die korrekte Redirect-URL basierend auf der Umgebung
+      const redirectUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://cardl.io/auth/callback'
+        : `${window.location.origin}/auth/callback`
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`
+          redirectTo: redirectUrl
         }
       })
       
@@ -66,10 +76,15 @@ export default function AuthForm() {
         return
       }
 
+      // Bestimme die korrekte Redirect-URL basierend auf der Umgebung
+      const redirectUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://cardl.io/auth/callback'
+        : `${window.location.origin}/auth/callback`
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'apple',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`
+          redirectTo: redirectUrl
         }
       })
       
