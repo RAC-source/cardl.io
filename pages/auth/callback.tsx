@@ -110,6 +110,42 @@ export default function AuthCallback() {
         }
 
         if (data.session) {
+          // Prüfe ob es sich um eine Magic Link-Registrierung handelt
+          const user = data.session.user
+          const isRegistration = user.user_metadata?.is_registration === true
+          const registrationPassword = user.user_metadata?.password
+          
+          if (isRegistration && registrationPassword) {
+            console.log('🆕 Magic Link registration detected, creating user profile...')
+            
+            // Erstelle Benutzerprofil für Magic Link-Registrierung
+            try {
+              const createResponse = await fetch('/api/create-profile', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  user_id: user.id,
+                  email: user.email || '',
+                  full_name: user.user_metadata?.full_name || user.email?.split('@')[0],
+                  avatar_url: user.user_metadata?.avatar_url,
+                  provider: 'email'
+                })
+              })
+              
+              const createResult = await createResponse.json()
+              
+              if (createResponse.ok && createResult.success) {
+                console.log('✅ Profile created for Magic Link registration:', createResult)
+              } else {
+                console.error('❌ Profile creation for Magic Link failed:', createResult)
+              }
+            } catch (error) {
+              console.error('❌ Error creating profile for Magic Link:', error)
+            }
+          }
+          
           await handleSuccessfulAuth(data.session)
           return
         }
