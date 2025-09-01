@@ -382,6 +382,15 @@ export default function DashboardPage() {
                 </div>
                 
                 <div className="feature-card">
+                  <div className="feature-icon">🧰</div>
+                  <h3>Karten-Editor Pro</h3>
+                  <p>Frei positionierbare Elemente: Text, Formen, Bild, Drag & Drop.</p>
+                  <a href="/editor-pro" className="btn btn-secondary" style={{ marginTop: '16px' }}>
+                    Editor Pro öffnen →
+                  </a>
+                </div>
+                
+                <div className="feature-card">
                   <div className="feature-icon">📋</div>
                   <h3>Meine Projekte</h3>
                   <p>Verwalten Sie Ihre gespeicherten Entwürfe und Bestellungen an einem Ort.</p>
