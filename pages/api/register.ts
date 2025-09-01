@@ -8,10 +8,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { email, full_name } = req.body
+    const { email, password, full_name } = req.body
 
     if (!email) {
       return res.status(400).json({ error: 'Email is required' })
+    }
+
+    if (!password) {
+      return res.status(400).json({ error: 'Password is required' })
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters long' })
     }
 
     console.log('🆕 Processing registration for:', email)
@@ -33,7 +41,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Verwende normale signUp statt admin.createUser
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
-      password: `temp-password-${Date.now()}`, // Temporäres Passwort
+      password: password, // Verwende das echte Passwort
       options: {
         data: {
           full_name: full_name || email.split('@')[0],

@@ -4,6 +4,7 @@ import { UserService } from '../lib/userService'
 
 export default function AuthForm() {
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [isRegistration, setIsRegistration] = useState(false)
@@ -114,6 +115,7 @@ export default function AuthForm() {
         },
         body: JSON.stringify({
           email: email,
+          password: password,
           full_name: email.split('@')[0] // Verwende E-Mail-Prefix als Name
         })
       })
@@ -229,6 +231,36 @@ export default function AuthForm() {
                 fontSize: '14px'
               }}
               placeholder="ihre@email.com"
+              required
+            />
+          </div>
+          <div style={{ marginBottom: '16px' }}>
+            <label htmlFor="reg-password" style={{ 
+              display: 'block', 
+              marginBottom: '8px', 
+              fontSize: '14px', 
+              color: '#e5e7eb',
+              fontWeight: '500'
+            }}>
+              🔒 Passwort
+            </label>
+            <input
+              type="password"
+              id="reg-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={{
+                width: '100%',
+                background: 'rgba(255,255,255,.08)',
+                border: '1px solid rgba(255,255,255,.18)',
+                color: '#e5e7eb',
+                borderRadius: '12px',
+                padding: '12px 16px',
+                outline: 'none',
+                fontSize: '14px'
+              }}
+              placeholder="Mindestens 6 Zeichen"
+              minLength={6}
               required
             />
           </div>
