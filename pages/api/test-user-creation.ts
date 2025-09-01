@@ -25,7 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     )
 
-    const testEmail = `test-${Date.now()}@example.com`
+    const testEmail = `test-${Date.now()}@cardl.io`
     const results = {
       method1: {
         name: 'createUser with email only',
